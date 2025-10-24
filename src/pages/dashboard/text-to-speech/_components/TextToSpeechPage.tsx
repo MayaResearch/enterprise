@@ -140,6 +140,7 @@ const TextToSpeechPage: React.FC = () => {
   const [stream, setStream] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>('maya_YOUR_API_KEY_HERE');
   const [output, setOutput] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<CodeTab>('python');
   const [contentTab, setContentTab] = useState<ContentTab>('generate');
@@ -159,7 +160,8 @@ const TextToSpeechPage: React.FC = () => {
     }
     
     setIsLoading(true);
-    setOutput('Generating speech...');
+    setError('');
+    setOutput('');
     
     // Clean up previous audio
     if (audioUrl) {
@@ -215,7 +217,7 @@ const TextToSpeechPage: React.FC = () => {
         };
         
         audio.onerror = () => {
-          setOutput('Error playing audio. Please try again.');
+          setError('Error playing audio. Please try again.');
           setIsPlaying(false);
         };
         
@@ -243,7 +245,7 @@ const TextToSpeechPage: React.FC = () => {
         setOutput(JSON.stringify(data, null, 2));
       }
     } catch (error) {
-      setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
       setAudioUrl(null);
       setAudioBlob(null);
       setIsPlaying(false);
@@ -634,24 +636,37 @@ const result = await maya.ttsGenerate({
               </div>
             </div>
 
-            {/* Audio Player */}
-            {isLoading && !audioUrl && (
-              <div className="space-y-3">
-                <Skeleton className="h-5 w-32" />
-                <div className="p-4 bg-gray-50 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-3 w-2/3" />
-                    </div>
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                  </div>
+            {/* Loading State - Circle Loader */}
+            {isLoading && (
+              <div className="flex items-center justify-center p-12 border border-gray-200 rounded-lg bg-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              </div>
+            )}
+
+            {/* Error State - Centered Error Message */}
+            {error && !isLoading && (
+              <div className="flex items-center justify-center p-8 border border-red-200 rounded-lg bg-red-50">
+                <div className="text-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-red-400 mb-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <p className="text-red-600 font-medium">{error}</p>
                 </div>
               </div>
             )}
 
-            {audioUrl && (
+            {/* Audio Player - Only show when audio is ready */}
+            {audioUrl && !isLoading && !error && (
               <div className="space-y-3">
                 <label className="text-sm font-medium">Generated Audio</label>
                 <div className="p-4 bg-gray-50 border rounded-lg">
@@ -733,11 +748,11 @@ const result = await maya.ttsGenerate({
               </div>
             )}
 
-            {/* Output (for non-audio responses or errors) */}
-            {output && !audioUrl && (
+            {/* Output (for non-audio responses - debug only) */}
+            {output && !audioUrl && !isLoading && !error && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Output</label>
+                  <label className="text-sm font-medium">Debug Output</label>
                   <button
                     onClick={() => copyToClipboard(output)}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
