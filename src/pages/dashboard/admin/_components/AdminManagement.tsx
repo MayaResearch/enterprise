@@ -14,16 +14,24 @@ interface User {
 const AdminManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async (): Promise<void> => {
+  const fetchUsers = async (forceRefresh: boolean = false): Promise<void> => {
     try {
-      setIsLoading(true);
-      const response = await fetch('/api/admin/users');
+      if (forceRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+      
+      const url = forceRefresh ? '/api/admin/users?refresh=true' : '/api/admin/users';
+      const response = await fetch(url);
+      
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
@@ -34,7 +42,12 @@ const AdminManagement: React.FC = () => {
       console.error('Error fetching users:', error);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleHardRefresh = (): void => {
+    fetchUsers(true);
   };
 
   const handleTogglePermission = async (userId: string, currentPermission: boolean): Promise<void> => {
@@ -116,12 +129,61 @@ const AdminManagement: React.FC = () => {
     <div className="flex justify-center min-h-screen w-full px-4 py-8">
       <div className="w-full max-w-5xl">
         <header className="mb-8">
-          <h1 className="text-2xl text-foreground font-semibold mb-2">
-            Admin Management
-          </h1>
-          <p className="text-sm text-subtle font-medium">
-            Manage user permissions and platform access
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl text-foreground font-semibold mb-2">
+                Admin Management
+              </h1>
+              <p className="text-sm text-subtle font-medium">
+                Manage user permissions and platform access
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleHardRefresh}
+                disabled={isRefreshing}
+                className="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 text-foreground shadow-none disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 h-10 px-4 rounded-full gap-2"
+              >
+                {isRefreshing ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                    height={16}
+                    width={16}
+                    className="animate-spin"
+                  >
+                    <path d="M146.498 47C146.498 56.9411 138.439 65 128.498 65C118.557 65 110.498 56.9411 110.498 47C110.498 37.0589 118.557 29 128.498 29C138.439 29 146.498 37.0589 146.498 47Z" />
+                    <path d="M203.831 91.9468C196.059 98.145 184.734 96.8689 178.535 89.0967C172.337 81.3244 173.613 69.9991 181.386 63.8009C189.158 57.6027 200.483 58.8787 206.681 66.651C212.88 74.4233 211.603 85.7486 203.831 91.9468Z" />
+                    <path d="M204.437 164.795C194.745 162.583 188.681 152.933 190.894 143.241C193.106 133.549 202.756 127.486 212.448 129.698C222.14 131.91 228.203 141.56 225.991 151.252C223.779 160.944 214.129 167.008 204.437 164.795Z" />
+                    <path d="M147.859 210.689C143.546 201.733 147.31 190.975 156.267 186.662C165.223 182.349 175.981 186.113 180.294 195.07C184.607 204.026 180.843 214.784 171.887 219.097C162.93 223.41 152.172 219.646 147.859 210.689Z" />
+                    <path d="M76.7023 195.07C81.0156 186.113 91.773 182.349 100.73 186.662C109.686 190.975 113.45 201.733 109.137 210.689C104.824 219.646 94.0665 223.41 85.1098 219.097C76.1532 214.784 72.389 204.026 76.7023 195.07Z" />
+                    <path d="M44.5487 129.698C54.2406 127.486 63.8907 133.549 66.1028 143.241C68.3149 152.933 62.2514 162.583 52.5595 164.795C42.8676 167.008 33.2175 160.944 31.0054 151.252C28.7933 141.56 34.8568 131.91 44.5487 129.698Z" />
+                    <path d="M75.6108 63.8009C83.3831 69.9991 84.6592 81.3244 78.461 89.0967C72.2628 96.8689 60.9375 98.145 53.1652 91.9468C45.3929 85.7486 44.1168 74.4233 50.315 66.651C56.5132 58.8787 67.8385 57.6027 75.6108 63.8009Z" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={16}
+                    height={16}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                    <path d="M16 16h5v5" />
+                  </svg>
+                )}
+                {isRefreshing ? 'Refreshing...' : 'Hard Refresh'}
+              </button>
+            </div>
+          </div>
         </header>
 
         <main className="flex flex-col">
