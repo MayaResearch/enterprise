@@ -147,8 +147,8 @@ const Sidebar: React.FC = () => {
       )
     },
     {
-      id: 'voice-creator',
-      label: 'Voice Creator',
+      id: 'voice-management',
+      label: 'Voice Management',
       href: '/dashboard/admin/voices',
       icon: (
         <svg

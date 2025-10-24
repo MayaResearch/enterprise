@@ -1,6 +1,6 @@
 ---
 import DashboardLayout from '../../../../layouts/DashboardLayout.astro';
-import VoiceCreator from './_components/VoiceCreator';
+import VoiceManagement from './_components/VoiceManagement';
 
 // Check if user is admin (server-side check)
 if (!Astro.locals.user?.isAdmin) {
@@ -8,7 +8,7 @@ if (!Astro.locals.user?.isAdmin) {
 }
 ---
 
-<DashboardLayout title="Voice Creator - Maya Research">
-  <VoiceCreator client:load />
+<DashboardLayout title="Voice Management - Maya Research">
+  <VoiceManagement client:load />
 </DashboardLayout>
 
