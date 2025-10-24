@@ -1263,37 +1263,7 @@ const result = await maya.ttsGenerate({
               You don't have permission to access this platform feature.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="flex gap-3">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={20}
-                  height={20}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-amber-600 flex-shrink-0 mt-0.5"
-                >
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                  <line x1="12" y1="9" x2="12" y2="13" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-                <div>
-                  <p className="text-sm font-medium text-amber-900 mb-1">
-                    Access Restricted
-                  </p>
-                  <p className="text-sm text-amber-800">
-                    Please contact the Maya team to request platform access. Once granted, you'll be able to generate speech and use all platform features.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() => setPermissionDeniedOpen(false)}
               className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 h-9 px-4 rounded-full inline-flex border border-gray-200 hover:bg-gray-50"
