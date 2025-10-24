@@ -132,8 +132,8 @@ const voices: Voice[] = [
 ];
 
 const TextToSpeechPage: React.FC = () => {
-  const { user } = useAuth();
-  const hasPermission = user?.user_metadata?.permission_granted || false;
+  const { permissionGranted } = useAuth();
+  const hasPermission = permissionGranted;
   
   const [voiceId, setVoiceId] = useState<string>('Ava');
   const [text, setText] = useState<string>('Welcome back to another episode of our podcast! Today we are diving into an absolutely fascinating topic.');

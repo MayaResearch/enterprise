@@ -11,7 +11,7 @@ interface NavItem {
 
 const Sidebar: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>('')
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
 
   useEffect(() => {
     setCurrentPath(window.location.pathname)
@@ -222,7 +222,7 @@ const Sidebar: React.FC = () => {
           )}
 
           {/* Admin Section - Only visible to admins */}
-          {user?.user_metadata?.is_admin && (
+          {isAdmin && (
             <>
               <div className="mb-[22px]"></div>
               <p className='not-italic mb-1 font-medium text-[rgb(141,156,167)] transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto whitespace-nowrap antialiased text-sm'>

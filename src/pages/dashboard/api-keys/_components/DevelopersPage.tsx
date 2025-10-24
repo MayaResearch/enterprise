@@ -32,8 +32,8 @@ interface ToggleConfirmation {
 }
 
 const DevelopersPage: React.FC = () => {
-  const { user } = useAuth();
-  const hasPermission = user?.user_metadata?.permission_granted || false;
+  const { permissionGranted } = useAuth();
+  const hasPermission = permissionGranted;
   
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
