@@ -190,26 +190,36 @@ const DevelopersPage: React.FC = () => {
 
   // Show loading state
   if (isLoading) {
-  return (
-      <div className="flex justify-center items-center min-h-screen w-full px-4 py-8">
+    return (
+      <div className="w-full px-4 py-6 sm:py-8 sm:flex sm:justify-center sm:items-center sm:min-h-screen">
         <div className="w-full max-w-5xl">
           {/* Header Skeleton */}
-          <div className="mb-6 space-y-4">
-            <Skeleton className="h-10 w-64" />
-            <Skeleton className="h-5 w-96" />
+          <div className="flex items-center justify-between gap-2 sm:gap-4 border-b pb-4 mb-6 sm:mb-8">
+            <Skeleton className="h-7 sm:h-10 w-28 sm:w-32" />
+            <Skeleton className="h-9 sm:h-10 w-20 sm:w-40" />
+          </div>
+
+          {/* Description Skeleton */}
+          <div className="mb-6">
+            <Skeleton className="h-4 w-full max-w-md mb-2" />
+            <Skeleton className="h-4 w-3/4 max-w-xs" />
           </div>
 
           {/* Buttons Skeleton */}
-          <div className="flex gap-3 mb-6">
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-36" />
-            <div className="ml-auto">
-              <Skeleton className="h-10 w-36" />
-            </div>
+          <div className="flex gap-2 sm:gap-3 mb-6">
+            <Skeleton className="h-9 sm:h-10 flex-1 sm:w-32" />
+            <Skeleton className="h-9 sm:h-10 flex-1 sm:w-36" />
           </div>
 
-          {/* Table Skeleton */}
-          <div className="rounded-lg border border-gray-200 overflow-hidden">
+          {/* Mobile Card Skeletons */}
+          <div className="sm:hidden space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 rounded-lg" />
+            ))}
+          </div>
+
+          {/* Desktop Table Skeleton */}
+          <div className="hidden sm:block rounded-lg border border-gray-200 overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
@@ -250,8 +260,8 @@ const DevelopersPage: React.FC = () => {
   // Show empty state if no keys
   if (apiKeys.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-screen w-full px-4 py-8">
-        <div className="w-full max-w-md flex flex-col items-center text-center">
+      <div className="w-full px-4 py-6 sm:py-8 sm:flex sm:justify-center sm:items-center sm:min-h-screen">
+        <div className="w-full max-w-md flex flex-col items-center text-center pt-12 sm:pt-0">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={64}
@@ -268,16 +278,16 @@ const DevelopersPage: React.FC = () => {
             <path d="m21 2-9.6 9.6" />
             <path d="m15.5 7.5 3 3L22 7l-3-3" />
           </svg>
-          <h2 className="text-2xl font-semibold mb-2" style={{ color: '#262626' }}>
+          <h2 className="text-xl sm:text-2xl font-semibold mb-2" style={{ color: '#262626' }}>
             No API Keys Yet
           </h2>
-          <p className="text-gray-600 mb-8 max-w-sm">
+          <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-sm">
             Create your first API key to start using the Maya API
           </p>
           <button
             type="button"
             onClick={handleCreateKey}
-            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 text-white h-10 px-6 rounded-full"
+            className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 text-white h-9 sm:h-10 px-4 sm:px-6 rounded-full"
             style={{ backgroundColor: '#262626' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
@@ -429,13 +439,13 @@ const DevelopersPage: React.FC = () => {
 
   // Show table with API keys
   return (
-    <div className="flex justify-center items-center min-h-screen w-full px-4 py-8">
+    <div className="w-full px-4 py-6 sm:py-8 sm:flex sm:justify-center sm:items-center sm:min-h-screen">
       <div className="w-full max-w-5xl">
-        <header className="flex items-center justify-between gap-4 border-b pb-4 mb-8">
+        <header className="flex items-center justify-between gap-2 sm:gap-4 border-b pb-4 mb-6 sm:mb-8">
           <div>
             <h1
               data-testid="page-title"
-              className="text-2xl text-foreground font-semibold"
+              className="text-xl sm:text-2xl text-foreground font-semibold"
             >
               API Keys
             </h1>
@@ -447,8 +457,9 @@ const DevelopersPage: React.FC = () => {
               href="mailto:support@mayaresearch.ai"
             rel="noopener noreferrer"
           >
-              <button className="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-10 px-4 rounded-full">
-                Contact us for any issue
+              <button className="relative inline-flex items-center justify-center whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-9 sm:h-10 px-3 sm:px-4 rounded-full">
+                <span className="hidden sm:inline">Contact us for any issue</span>
+                <span className="sm:hidden">Contact</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={24}
@@ -469,17 +480,17 @@ const DevelopersPage: React.FC = () => {
         </div>
       </header>
         <main className="flex flex-col">
-            <section className="flex flex-wrap xs:flex-nowrap justify-between items-end gap-6">
-              <p className="text-sm text-subtle font-medium max-w-[600px]">
+            <section className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-6 mb-6">
+              <p className="text-xs sm:text-sm text-subtle font-medium max-w-[600px]">
                 An API key lets you connect to our API and use its features. You can
                 create multiple keys with different access levels.
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3 w-full sm:w-auto flex-shrink-0">
                 <button
                   type="button"
                   onClick={handleHardRefresh}
                   disabled={isRefreshing}
-                  className="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 text-foreground shadow-none disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 h-10 px-4 rounded-full gap-2"
+                  className="relative inline-flex items-center justify-center whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 text-foreground shadow-none disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 h-9 sm:h-10 px-3 sm:px-4 rounded-full gap-2 flex-1 sm:flex-none"
                 >
                   {isRefreshing ? (
                     <svg
@@ -516,13 +527,14 @@ const DevelopersPage: React.FC = () => {
                       <path d="M16 16h5v5" />
                     </svg>
                   )}
-                  {isRefreshing ? 'Refreshing...' : 'Hard Refresh'}
+                  <span className="hidden sm:inline">{isRefreshing ? 'Refreshing...' : 'Hard Refresh'}</span>
+                  <span className="sm:hidden">{isRefreshing ? 'Refresh...' : 'Refresh'}</span>
                 </button>
               <button
                 type="button"
                 onClick={handleCreateKey}
                 data-loading="false"
-                  className="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent text-background shadow-none disabled:bg-gray-400 disabled:text-gray-100 h-10 px-4 rounded-full"
+                  className="relative inline-flex items-center justify-center whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent text-background shadow-none disabled:bg-gray-400 disabled:text-gray-100 h-9 sm:h-10 px-3 sm:px-4 rounded-full flex-1 sm:flex-none"
                   style={{ backgroundColor: '#262626' }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
@@ -546,8 +558,40 @@ const DevelopersPage: React.FC = () => {
               </button>
               </div>
             </section>
-            <section className="mt-7">
-              <div className="relative w-full overflow-auto no-scrollbar overflow-x-scroll">
+            <section className="mt-0 sm:mt-7">
+              {/* Mobile Card Layout */}
+              <div className="sm:hidden space-y-3">
+                {apiKeys.map((apiKey) => (
+                  <div key={apiKey.id} className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+                    {/* Name and Info */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground font-medium truncate mb-1">
+                          {apiKey.label}
+                        </p>
+                        <p className="text-xs font-mono text-gray-600">
+                          •••••••••••••••••••••
+                          <span className="inline-block">{apiKey.keyPreview}</span>
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={apiKey.isActive}
+                        onCheckedChange={(checked) => handleToggleRequest(apiKey.id, apiKey.label, checked)}
+                      />
+                    </div>
+                    
+                    {/* Created Date */}
+                    <div className="pt-2 border-t border-gray-100">
+                      <p className="text-xs text-gray-500">
+                        Created {formatDate(apiKey.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table Layout */}
+              <div className="hidden sm:block relative w-full overflow-auto no-scrollbar overflow-x-scroll">
                 <table className="w-full caption-bottom text-sm max-w-full">
                   <thead className="[&_tr]:border-b">
                     <tr className="border-b transition-colors data-[state=selected]:bg-muted hover:bg-unset">
