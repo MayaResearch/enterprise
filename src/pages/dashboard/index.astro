@@ -1,0 +1,10 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import Home from './_components/Home';
+
+
+---
+
+<DashboardLayout title="Dashboard - Maya Research">
+  <Home client:only="react" />
+</DashboardLayout>
