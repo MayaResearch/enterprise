@@ -597,9 +597,9 @@ const result = await maya.createVoice({
                 {/* Manage Voices Content */}
                 <div className="space-y-4 sm:space-y-6">
                   {isLoadingVoices ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 gap-3">
                       {[1, 2, 3, 4].map(i => (
-                        <Skeleton key={i} className="h-48 rounded-lg" />
+                        <Skeleton key={i} className="h-24 rounded-lg" />
                       ))}
                     </div>
                   ) : voices.length === 0 ? (
@@ -613,69 +613,93 @@ const result = await maya.createVoice({
                       </button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                      {voices.map(voice => (
-                        <div key={voice.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 space-y-3 hover:border-gray-300 transition-colors">
-                          <div className="flex items-start gap-2 sm:gap-3">
-                            {voice.imageUrl ? (
-                              <img src={voice.imageUrl} alt={voice.name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover flex-shrink-0" />
-                            ) : (
-                              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
-                                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                                  <line x1="12" y1="19" x2="12" y2="22" />
-                                </svg>
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm sm:text-base truncate">{voice.name}</h3>
-                              {voice.description && (
-                                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1">{voice.description}</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      {voices.map((voice, index) => (
+                        <div key={voice.id} className="group/octave-voice-card flex min-h-24 flex-row gap-0 rounded-lg border border-gray-200 bg-white hover:shadow-sm transition-shadow">
+                          {/* Avatar Section */}
+                          <div className="flex h-full shrink-0 items-center py-2.5 pl-2 pr-4">
+                            <div
+                              className="group/voice-card relative aspect-square shrink-0 rounded size-20 grid place-content-center overflow-hidden bg-gradient-to-b from-blue-300 to-blue-300"
+                              data-index={index % 6}
+                            >
+                              {voice.imageUrl && (
+                                <img 
+                                  src={voice.imageUrl} 
+                                  alt={voice.name} 
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                />
                               )}
+                              <div className="absolute inset-0 grid place-content-center">
+                                <button 
+                                  className="relative grid size-8 place-content-center rounded-full bg-white/80 text-gray-800 outline-none hover:bg-white/100"
+                                  onClick={() => voice.previewUrl && handlePreviewPlay(voice.id, voice.previewUrl)}
+                                >
+                                  {previewPlayingVoiceId === voice.id ? (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width={24}
+                                      height={24}
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="size-4"
+                                    >
+                                      <rect x="6" y="4" width="4" height="16" fill="currentColor" />
+                                      <rect x="14" y="4" width="4" height="16" fill="currentColor" />
+                                    </svg>
+                                  ) : (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width={24}
+                                      height={24}
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="size-4 [&_path]:fill-current"
+                                    >
+                                      <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+                                    </svg>
+                                  )}
+                                </button>
+                              </div>
                             </div>
                           </div>
-                          
-                          {voice.previewUrl && (
-                            <button
-                              onClick={() => handlePreviewPlay(voice.id, voice.previewUrl!)}
-                              className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 hover:text-gray-900 transition-colors"
-                            >
-                              {previewPlayingVoiceId === voice.id ? (
-                                <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="sm:w-4 sm:h-4">
-                                    <rect x="6" y="4" width="4" height="16" />
-                                    <rect x="14" y="4" width="4" height="16" />
-                                  </svg>
-                                  <span className="hidden xs:inline">Pause Preview</span>
-                                  <span className="xs:hidden">Pause</span>
-                                </>
-                              ) : (
-                                <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="sm:w-4 sm:h-4">
-                                    <path d="M8 5v14l11-7z" />
-                                  </svg>
-                                  <span className="hidden xs:inline">Play Preview</span>
-                                  <span className="xs:hidden">Play</span>
-                                </>
-                              )}
-                            </button>
-                          )}
 
-                          <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-0 pt-2 border-t border-gray-200">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs sm:text-sm text-gray-600">Show to Public</span>
+                          {/* Voice Info */}
+                          <div className="flex min-w-0 shrink grow flex-col items-start justify-center gap-1 py-4 pl-0">
+                            <div className="flex w-full items-center gap-0">
+                              <span className="min-w-0 flex-1 truncate text-base/5 font-medium">
+                                {voice.name}
+                              </span>
+                            </div>
+                            <div className="flex w-full items-center gap-0">
+                              <span className="min-w-0 flex-1 truncate text-sm/4 font-normal text-gray-600">
+                                {voice.description || 'No description'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex shrink-0 flex-row items-center justify-end gap-2 px-4 py-2">
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-200 bg-white">
+                              <span className="text-xs text-gray-600 whitespace-nowrap">Public</span>
                               <Switch
                                 checked={voice.isPublic}
                                 onCheckedChange={() => handleTogglePublic(voice.id, voice.isPublic)}
                               />
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full self-start xs:self-auto ${
+                            <span className={`text-xs px-3 py-2 rounded-full border ${
                               voice.isPublic 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-gray-100 text-gray-600'
+                                ? 'bg-green-50 text-green-700 border-green-200' 
+                                : 'bg-gray-50 text-gray-600 border-gray-200'
                             }`}>
-                              {voice.isPublic ? 'Public' : 'Private'}
+                              {voice.isPublic ? 'Visible' : 'Hidden'}
                             </span>
                           </div>
                         </div>
