@@ -10,7 +10,6 @@ const Home = () => {
   <div className="mb-6">
     <a
       href="/dashboard/text-to-speech"
-      target="_blank"
       rel="noopener noreferrer"
       className="inline-block px-6 py-3 text-white rounded-full font-medium transition-colors duration-200"
       style={{ backgroundColor: '#262626' }}
