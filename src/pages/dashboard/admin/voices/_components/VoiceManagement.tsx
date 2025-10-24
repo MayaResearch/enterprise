@@ -678,7 +678,7 @@ const result = await maya.createVoice({
                           <div className="flex min-w-0 shrink grow flex-col items-start justify-center gap-1 py-4 pl-0">
                             <div className="flex w-full items-center gap-0">
                               <span className="min-w-0 flex-1 truncate text-base/5 font-medium">
-                                {voice.name}
+                                {voice.name} <span className="text-gray-400 font-normal">({voice.voiceId})</span>
                               </span>
                             </div>
                             <div className="flex w-full items-center gap-0">
