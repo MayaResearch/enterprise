@@ -5,7 +5,7 @@ const Home = () => {
     Maya Built for Voice AI
   </h1>
   <p className="mb-4 text-base md:text-lg text-[var(--greige)] max-w-[28ch] md:max-w-2xl">
-    One API to connect your products to powerful web search
+    One API to connect your products to Great Voices
   </p>
   <div className="mb-6">
     <a
