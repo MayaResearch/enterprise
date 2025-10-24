@@ -108,6 +108,15 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
     }
   }
 
+  // Don't redirect on API routes or auth callback routes
+  const isApiRoute = pathname.startsWith('/api/');
+  const isAuthCallback = pathname.includes('/auth/callback') || url.searchParams.has('code');
+  
+  // Skip redirects for API and auth callback routes
+  if (isApiRoute || isAuthCallback) {
+    return next();
+  }
+
   // Server-side redirects based on authentication
   const isAuthenticated = !!locals.user;
 
