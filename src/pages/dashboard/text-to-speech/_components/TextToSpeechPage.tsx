@@ -535,26 +535,26 @@ const result = await maya.ttsGenerate({
   return (
     <div className="flex h-full w-full overflow-hidden">
       {/* Left Side - API Testing */}
-      <div className="flex-1 flex flex-col overflow-hidden border-r">
-        <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-3xl mx-auto space-y-6">
+      <div className="flex-1 flex flex-col overflow-hidden lg:border-r">
+        <div className="flex-1 overflow-auto p-4 sm:p-6">
+          <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
             {/* Header */}
             <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-2">
+              <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
                 Text to Speech API
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Convert text to natural-sounding speech using our API
               </p>
             </div>
 
             {/* Tabs */}
-            <div className="flex shrink-0 flex-row items-center justify-between mb-6">
-              <div className="flex justify-start gap-3 overflow-x-auto scrollbar-none md:scrollbar-thin">
+            <div className="flex shrink-0 flex-row items-center justify-between gap-2 mb-4 sm:mb-6">
+              <div className="flex justify-start gap-2 sm:gap-3 overflow-x-auto scrollbar-none md:scrollbar-thin">
                 <button
                   type="button"
                   onClick={() => setContentTab('generate')}
-                  className={`relative isolate flex items-center gap-1 text-base font-medium pb-2 border-b-2 shrink-0 ${
+                  className={`relative isolate flex items-center gap-1 text-sm sm:text-base font-medium pb-2 border-b-2 shrink-0 ${
                     contentTab === 'generate' 
                       ? 'border-current opacity-100' 
                       : 'border-transparent opacity-50 hover:opacity-100'
@@ -565,7 +565,7 @@ const result = await maya.ttsGenerate({
                 <button
                   type="button"
                   onClick={() => setContentTab('similar')}
-                  className={`relative isolate flex items-center gap-1 text-base font-medium pb-2 border-b-2 shrink-0 ${
+                  className={`relative isolate flex items-center gap-1 text-sm sm:text-base font-medium pb-2 border-b-2 shrink-0 ${
                     contentTab === 'similar' 
                       ? 'border-current opacity-100' 
                       : 'border-transparent opacity-50 hover:opacity-100'
@@ -632,11 +632,11 @@ const result = await maya.ttsGenerate({
                     e.target.style.height = Math.max(80, e.target.scrollHeight) + 'px';
                   }}
                 />
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  {/* Mobile: Buttons below - Desktop: Shuffle on left */}
+                  <div className="hidden sm:flex items-center gap-2">
                     <button
                       onClick={() => {
-                        // Shuffle/randomize the text (you can implement your shuffle logic here)
                         const words = text.split(' ');
                         const shuffled = words.sort(() => Math.random() - 0.5).join(' ');
                         setText(shuffled);
@@ -662,13 +662,13 @@ const result = await maya.ttsGenerate({
                       Shuffle
                     </button>
                   </div>
-                  <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setText('');
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
-                      >
+
+                  {/* Desktop: Clear and Run on right */}
+                  <div className="hidden sm:flex items-center gap-2">
+                    <button
+                      onClick={() => setText('')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
+                    >
                       <svg 
                         xmlns="http://www.w3.org/2000/svg" 
                         width="16" 
@@ -685,14 +685,69 @@ const result = await maya.ttsGenerate({
                       </svg>
                       Clear
                     </button>
-                      <button
-                        onClick={handleGenerate}
-                        disabled={isLoading}
-                        className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white disabled:bg-gray-400 transition-colors rounded-full"
-                        style={{ backgroundColor: isLoading ? undefined : '#262626' }}
-                        onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#3a3a3a')}
-                        onMouseLeave={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#262626')}
+                    <button
+                      onClick={handleGenerate}
+                      disabled={isLoading}
+                      className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white disabled:bg-gray-400 transition-colors rounded-full"
+                      style={{ backgroundColor: isLoading ? undefined : '#262626' }}
+                      onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#3a3a3a')}
+                      onMouseLeave={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#262626')}
+                    >
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="white" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
                       >
+                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+                        <path d="M5 3v4"></path>
+                        <path d="M19 17v4"></path>
+                        <path d="M3 5h4"></path>
+                        <path d="M17 19h4"></path>
+                      </svg>
+                      {isLoading ? 'Running...' : 'Run'}
+                    </button>
+                  </div>
+
+                  {/* Mobile: Equal width buttons below textarea */}
+                  <div className="flex sm:hidden w-full gap-2">
+                    <button
+                      onClick={() => {
+                        const words = text.split(' ');
+                        const shuffled = words.sort(() => Math.random() - 0.5).join(' ');
+                        setText(shuffled);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg border border-gray-300 hover:bg-gray-50"
+                    >
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22" />
+                        <polyline points="18 2 22 6 18 10" />
+                        <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
+                        <polyline points="22 18 18 22 14 18" />
+                      </svg>
+                      Shuffle
+                    </button>
+                    <button
+                      onClick={handleGenerate}
+                      disabled={isLoading}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white disabled:bg-gray-400 transition-colors rounded-lg"
+                      style={{ backgroundColor: isLoading ? undefined : '#262626' }}
+                    >
                       <svg 
                         xmlns="http://www.w3.org/2000/svg" 
                         width="16" 
@@ -718,16 +773,16 @@ const result = await maya.ttsGenerate({
             </div>
 
             {/* API Key Input - Side by Side */}
-            <div className="flex gap-8 items-center">
-              <div className="flex-shrink-0" style={{ width: '280px' }}>
-                <label htmlFor="api-key" className="text-base font-semibold block">
+            <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-8 sm:items-center">
+              <div className="flex-shrink-0 w-full sm:w-[280px]">
+                <label htmlFor="api-key" className="text-sm font-medium sm:text-base sm:font-semibold block">
                   API Key
                 </label>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="hidden sm:block text-sm text-muted-foreground mt-1">
                   Your Maya API key for authentication
                 </p>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <div className="flex min-w-0 shrink grow p-1 border border-input rounded-md">
                   <input
                     id="api-key"
@@ -735,23 +790,23 @@ const result = await maya.ttsGenerate({
                     placeholder="maya_YOUR_API_KEY_HERE"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    className="min-w-0 flex-auto shrink grow bg-transparent p-1 text-inherit placeholder:text-muted-foreground focus:outline-none disabled:pointer-events-none font-mono text-sm"
+                    className="min-w-0 flex-auto shrink grow bg-transparent p-1 text-inherit placeholder:text-muted-foreground focus:outline-none disabled:pointer-events-none font-mono text-xs sm:text-sm"
                   />
                 </div>
               </div>
             </div>
 
             {/* Voice ID Select - Side by Side */}
-            <div className="flex gap-8 items-center">
-              <div className="flex-shrink-0" style={{ width: '280px' }}>
-                <label htmlFor="voice-id" className="text-base font-semibold block">
+            <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-8 sm:items-center">
+              <div className="flex-shrink-0 w-full sm:w-[280px]">
+                <label htmlFor="voice-id" className="text-sm font-medium sm:text-base sm:font-semibold block">
                   Voice ID
                 </label>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="hidden sm:block text-sm text-muted-foreground mt-1">
                   Choose a voice for speech synthesis
                 </p>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <VoicePicker
                   voices={voices}
                   value={voiceId}
@@ -764,7 +819,22 @@ const result = await maya.ttsGenerate({
             {/* Loading State - Circle Loader */}
             {isLoading && (
               <div className="flex items-center justify-center p-12 border border-gray-200 rounded-lg bg-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                  height={48}
+                  width={48}
+                  className="animate-spin text-gray-900"
+                >
+                  <path d="M146.498 47C146.498 56.9411 138.439 65 128.498 65C118.557 65 110.498 56.9411 110.498 47C110.498 37.0589 118.557 29 128.498 29C138.439 29 146.498 37.0589 146.498 47Z" />
+                  <path d="M203.831 91.9468C196.059 98.145 184.734 96.8689 178.535 89.0967C172.337 81.3244 173.613 69.9991 181.386 63.8009C189.158 57.6027 200.483 58.8787 206.681 66.651C212.88 74.4233 211.603 85.7486 203.831 91.9468Z" />
+                  <path d="M204.437 164.795C194.745 162.583 188.681 152.933 190.894 143.241C193.106 133.549 202.756 127.486 212.448 129.698C222.14 131.91 228.203 141.56 225.991 151.252C223.779 160.944 214.129 167.008 204.437 164.795Z" />
+                  <path d="M147.859 210.689C143.546 201.733 147.31 190.975 156.267 186.662C165.223 182.349 175.981 186.113 180.294 195.07C184.607 204.026 180.843 214.784 171.887 219.097C162.93 223.41 152.172 219.646 147.859 210.689Z" />
+                  <path d="M76.7023 195.07C81.0156 186.113 91.773 182.349 100.73 186.662C109.686 190.975 113.45 201.733 109.137 210.689C104.824 219.646 94.0665 223.41 85.1098 219.097C76.1532 214.784 72.389 204.026 76.7023 195.07Z" />
+                  <path d="M44.5487 129.698C54.2406 127.486 63.8907 133.549 66.1028 143.241C68.3149 152.933 62.2514 162.583 52.5595 164.795C42.8676 167.008 33.2175 160.944 31.0054 151.252C28.7933 141.56 34.8568 131.91 44.5487 129.698Z" />
+                  <path d="M75.6108 63.8009C83.3831 69.9991 84.6592 81.3244 78.461 89.0967C72.2628 96.8689 60.9375 98.145 53.1652 91.9468C45.3929 85.7486 44.1168 74.4233 50.315 66.651C56.5132 58.8787 67.8385 57.6027 75.6108 63.8009Z" />
+                </svg>
               </div>
             )}
 
@@ -919,123 +989,209 @@ const result = await maya.ttsGenerate({
                 ) : (
                   // Voice cards
                   publicVoices.map((voice) => (
-                    <div key={voice.id} className="group/octave-voice-card flex min-h-24 flex-row gap-0 rounded-lg border border-gray-200 bg-white hover:shadow-sm transition-shadow">
-                      {/* Avatar Section */}
-                      <div className="flex h-full shrink-0 items-center py-2.5 pl-2 pr-4">
-                        <div className="group/voice-card relative aspect-square shrink-0 rounded size-20 grid place-content-center overflow-hidden bg-gradient-to-b from-blue-300 to-blue-300">
-                          {voice.imageUrl && (
-                            <img 
-                              src={voice.imageUrl} 
-                              alt={voice.name} 
-                              className="absolute inset-0 w-full h-full object-cover"
-                            />
-                          )}
-                          {voice.previewUrl && (
-                            <div className="absolute inset-0 grid place-content-center">
-                              <button 
-                                className="relative grid size-8 place-content-center rounded-full bg-white/80 text-gray-800 outline-none hover:bg-white/100"
-                                onClick={() => handlePublicVoicePreviewPlay(voice)}
-                              >
-                                {previewPlayingVoiceId === voice.voiceId ? (
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width={24}
-                                    height={24}
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="size-4"
+                    <div key={voice.id} className="group/octave-voice-card rounded-lg border border-gray-200 bg-white hover:shadow-sm transition-shadow">
+                      {/* Mobile Layout */}
+                      <div className="sm:hidden">
+                        {/* Top: Image and Info */}
+                        <div className="flex gap-3 p-3">
+                          {/* Avatar Section */}
+                          <div className="flex-shrink-0">
+                            <div className="group/voice-card relative aspect-square shrink-0 rounded size-20 grid place-content-center overflow-hidden bg-gradient-to-b from-blue-300 to-blue-300">
+                              {voice.imageUrl && (
+                                <img 
+                                  src={voice.imageUrl} 
+                                  alt={voice.name} 
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                />
+                              )}
+                              {voice.previewUrl && (
+                                <div className="absolute inset-0 grid place-content-center">
+                                  <button 
+                                    className="relative grid size-8 place-content-center rounded-full bg-white/80 text-gray-800 outline-none hover:bg-white/100"
+                                    onClick={() => handlePublicVoicePreviewPlay(voice)}
                                   >
-                                    <rect x="6" y="4" width="4" height="16" fill="currentColor" />
-                                    <rect x="14" y="4" width="4" height="16" fill="currentColor" />
-                                  </svg>
-                                ) : (
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width={24}
-                                    height={24}
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="size-4 [&_path]:fill-current"
-                                  >
-                                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
-                                  </svg>
-                                )}
-                              </button>
+                                    {previewPlayingVoiceId === voice.voiceId ? (
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width={24}
+                                        height={24}
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="size-4"
+                                      >
+                                        <rect x="6" y="4" width="4" height="16" fill="currentColor" />
+                                        <rect x="14" y="4" width="4" height="16" fill="currentColor" />
+                                      </svg>
+                                    ) : (
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width={24}
+                                        height={24}
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="size-4 [&_path]:fill-current"
+                                      >
+                                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+                                      </svg>
+                                    )}
+                                  </button>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
+
+                          {/* Voice Info */}
+                          <div className="flex-1 flex flex-col justify-center gap-1 min-w-0">
+                            <h3 className="text-sm font-medium truncate">
+                              {voice.name}
+                            </h3>
+                            <p className="text-xs text-gray-600 line-clamp-2">
+                              {voice.description || 'No description'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Bottom: Use Voice Button */}
+                        <div className="px-3 pb-3">
+                          <button
+                            onClick={() => {
+                              setVoiceId(voice.voiceId);
+                              setContentTab('generate');
+                            }}
+                            className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium border rounded-lg border-gray-200 bg-transparent hover:bg-gray-100 transition-colors"
+                          >
+                            Use Voice
+                          </button>
                         </div>
                       </div>
 
-                      {/* Voice Info */}
-                      <div className="flex min-w-0 shrink grow flex-col items-start justify-center gap-1 py-4 pl-0">
-                        <div className="flex w-full items-center gap-0">
-                          <span className="min-w-0 flex-1 truncate text-base/5 font-medium">
-                            {voice.name}
-                          </span>
+                      {/* Desktop Layout */}
+                      <div className="hidden sm:flex min-h-24 flex-row gap-0">
+                        {/* Avatar Section */}
+                        <div className="flex h-full shrink-0 items-center py-2.5 pl-2 pr-4">
+                          <div className="group/voice-card relative aspect-square shrink-0 rounded size-20 grid place-content-center overflow-hidden bg-gradient-to-b from-blue-300 to-blue-300">
+                            {voice.imageUrl && (
+                              <img 
+                                src={voice.imageUrl} 
+                                alt={voice.name} 
+                                className="absolute inset-0 w-full h-full object-cover"
+                              />
+                            )}
+                            {voice.previewUrl && (
+                              <div className="absolute inset-0 grid place-content-center">
+                                <button 
+                                  className="relative grid size-8 place-content-center rounded-full bg-white/80 text-gray-800 outline-none hover:bg-white/100"
+                                  onClick={() => handlePublicVoicePreviewPlay(voice)}
+                                >
+                                  {previewPlayingVoiceId === voice.voiceId ? (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width={24}
+                                      height={24}
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="size-4"
+                                    >
+                                      <rect x="6" y="4" width="4" height="16" fill="currentColor" />
+                                      <rect x="14" y="4" width="4" height="16" fill="currentColor" />
+                                    </svg>
+                                  ) : (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width={24}
+                                      height={24}
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth={2}
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="size-4 [&_path]:fill-current"
+                                    >
+                                      <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+                                    </svg>
+                                  )}
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex w-full items-center gap-0">
-                          <span className="min-w-0 flex-1 truncate text-sm/4 font-normal text-gray-600">
-                            {voice.description || 'No description'}
-                          </span>
-                        </div>
-                      </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex shrink-0 flex-row items-center justify-end gap-1 px-4 py-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button
-                              className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100"
-                              type="button"
-                            >
-                              Info
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-96" align="end">
-                            <div className="space-y-3">
-                              <div>
-                                <h4 className="font-semibold text-base mb-1">{voice.name}</h4>
-                                {voice.description && (
-                                  <p className="text-sm text-gray-600 italic">
-                                    {voice.description}
+                        {/* Voice Info */}
+                        <div className="flex min-w-0 shrink grow flex-col items-start justify-center gap-1 py-4">
+                          <div className="flex w-full items-center gap-0">
+                            <span className="min-w-0 flex-1 truncate text-base font-medium">
+                              {voice.name}
+                            </span>
+                          </div>
+                          <div className="flex w-full items-center gap-0">
+                            <span className="min-w-0 flex-1 truncate text-sm font-normal text-gray-600">
+                              {voice.description || 'No description'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex shrink-0 flex-row items-center justify-end gap-1 px-4 py-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button
+                                className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100"
+                                type="button"
+                              >
+                                Info
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-96" align="end">
+                              <div className="space-y-3">
+                                <div>
+                                  <h4 className="font-semibold text-base mb-1">{voice.name}</h4>
+                                  {voice.description && (
+                                    <p className="text-sm text-gray-600 italic">
+                                      {voice.description}
+                                    </p>
+                                  )}
+                                </div>
+                                {voice.voiceDescription && (
+                                  <div className="pt-2 border-t border-gray-200">
+                                    <p className="text-xs font-medium text-gray-700 mb-1.5">
+                                      Voice Description
+                                    </p>
+                                    <p className="text-sm text-muted-foreground leading-relaxed">
+                                      {voice.voiceDescription}
+                                    </p>
+                                  </div>
+                                )}
+                                {!voice.voiceDescription && !voice.description && (
+                                  <p className="text-sm text-muted-foreground">
+                                    No description available
                                   </p>
                                 )}
                               </div>
-                              {voice.voiceDescription && (
-                                <div className="pt-2 border-t border-gray-200">
-                                  <p className="text-xs font-medium text-gray-700 mb-1.5">
-                                    Voice Description
-                                  </p>
-                                  <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {voice.voiceDescription}
-                                  </p>
-                                </div>
-                              )}
-                              {!voice.voiceDescription && !voice.description && (
-                                <p className="text-sm text-muted-foreground">
-                                  No description available
-                                </p>
-                              )}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        <button
-                          onClick={() => {
-                            setVoiceId(voice.voiceId);
-                            setContentTab('generate');
-                          }}
-                          className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100 shrink-0"
-                        >
-                          Use Voice
-                        </button>
+                            </PopoverContent>
+                          </Popover>
+                          <button
+                            onClick={() => {
+                              setVoiceId(voice.voiceId);
+                              setContentTab('generate');
+                            }}
+                            className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100 shrink-0"
+                          >
+                            Use Voice
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))
