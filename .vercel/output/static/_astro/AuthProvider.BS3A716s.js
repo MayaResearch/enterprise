@@ -1,1 +1,0 @@
-import{j as r}from"./jsx-runtime.D_zvdyIk.js";import{r as i}from"./index.DIYlxJI2.js";import{i as o}from"./authStore.Dsf0ip_C.js";import"./tslib.es6.DcwbYiNs.js";function a({children:t}){return i.useEffect(()=>{o()},[]),r.jsx(r.Fragment,{children:t})}export{a as AuthProvider};
