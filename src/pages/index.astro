@@ -1,15 +1,8 @@
 ---
-// Server-side redirect is handled by middleware
-// This page should never be reached
+import Layout from '../layouts/Layout.astro';
+import { HomeRedirect } from '../components/home/HomeRedirect';
 ---
 
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Redirecting...</title>
-</head>
-<body>
-  <p>Redirecting...</p>
-</body>
-</html>
+<Layout title="Maya Research">
+  <HomeRedirect client:only="react" />
+</Layout>

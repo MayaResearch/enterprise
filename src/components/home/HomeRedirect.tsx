@@ -1,18 +1,40 @@
-import { useEffect } from 'react';
-import { useAuth } from '../../lib/hooks/useAuth';
+import { useEffect, type JSX } from 'react';
+import { supabase } from '../../lib/config/supabase';
 
 export function HomeRedirect(): JSX.Element {
-  const { loading, isAuthenticated } = useAuth();
-
   useEffect(() => {
-    if (!loading) {
-      if (isAuthenticated) {
+    const handleRedirect = async () => {
+      console.log('🔄 Processing redirect...');
+      
+      // Wait a moment for Supabase to process any OAuth callback
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Check authentication status (Supabase handles code exchange automatically)
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('❌ Error getting session:', error);
+        window.location.href = '/login?error=auth_failed';
+        return;
+      }
+      
+      if (session) {
+        console.log('✅ Session found, saving cookies and redirecting to dashboard');
+        
+        // Save tokens to cookies for server-side authentication
+        document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `sb-refresh-token=${session.refresh_token}; path=/; max-age=604800; SameSite=Lax`;
+        
+        // Redirect to dashboard
         window.location.href = '/dashboard';
       } else {
+        console.log('ℹ️ No session found, redirecting to login');
         window.location.href = '/login';
       }
-    }
-  }, [loading, isAuthenticated]);
+    };
+    
+    handleRedirect();
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
