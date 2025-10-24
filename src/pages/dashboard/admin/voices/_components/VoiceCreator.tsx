@@ -10,11 +10,14 @@ import {
 } from '@/components/ui/dialog';
 
 const VoiceCreator: React.FC = () => {
-  const [description, setDescription] = useState<string>('');
-  const [testText, setTestText] = useState<string>('Welcome to Maya Research. This is a test of the custom voice.');
+  const [description, setDescription] = useState<string>('Realistic male voice in the 20s age with a american accent. Low pitch, raspy timbre, slow pacing, neutral tone delivery at low intensity, commercial domain, ad_narrator role, casual delivery');
+  const [testText, setTestText] = useState<string>('Wow, <excited> this place looks even better than I imagined! <curious> How did they set all this up so perfectly?');
+  const [seed, setSeed] = useState<number>(1000);
+  const [apiKey, setApiKey] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioMimeType, setAudioMimeType] = useState<string>('audio/mpeg');
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -25,27 +28,71 @@ const VoiceCreator: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
+  // Cleanup audio URL on unmount
+  React.useEffect(() => {
+    return () => {
+      if (generatedAudioUrl) {
+        URL.revokeObjectURL(generatedAudioUrl);
+      }
+    };
+  }, [generatedAudioUrl]);
+
   const handleGenerateVoice = async (): Promise<void> => {
     if (!description.trim() || !testText.trim()) {
       alert('Please provide both description and test text');
       return;
     }
 
+    if (!apiKey.trim()) {
+      alert('Please provide an API key');
+      return;
+    }
+
     setIsGenerating(true);
 
     try {
-      // TODO: Replace with actual API call to generate voice
-      // For now, simulate with a delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call Maya Research TTS API
+      const response = await fetch('https://v3.mayaresearch.ai/v1/tts/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify({
+          description: description.trim(),
+          text: testText.trim(),
+          stream: false, // Non-streaming for easier handling
+          verbose: true,
+          seed: seed,
+        }),
+      });
 
-      // Mock audio URL - replace with actual generated audio
-      const mockAudioUrl = 'https://storage.googleapis.com/eleven-public-prod/premade/voices/21m00Tcm4TlvDq8ikWAM/b4928a68-c03b-411f-8533-3d5c299fd451.mp3';
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      // Get the audio blob
+      const blob = await response.blob();
+      const mimeType = response.headers.get('content-type') || 'audio/mpeg';
       
-      setGeneratedAudioUrl(mockAudioUrl);
-      // In real implementation, you would store the blob too
+      // Create object URL for playback
+      const url = URL.createObjectURL(blob);
+      
+      setAudioBlob(blob);
+      setAudioMimeType(mimeType);
+      setGeneratedAudioUrl(url);
+      
+      // Auto-play the generated audio
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch(err => {
+            console.log('Auto-play prevented:', err);
+          });
+        }
+      }, 100);
     } catch (error) {
       console.error('Error generating voice:', error);
-      alert('Failed to generate voice');
+      alert('Failed to generate voice. Please check your API key and try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -98,9 +145,12 @@ const VoiceCreator: React.FC = () => {
       formData.append('name', voiceName);
       formData.append('description', description);
       formData.append('testText', testText);
+      formData.append('seed', seed.toString());
       formData.append('image', imageFile);
       if (audioBlob) {
-        formData.append('audio', audioBlob, 'preview.mp3');
+        const extension = audioMimeType.includes('mp3') ? 'mp3' : 
+                          audioMimeType.includes('wav') ? 'wav' : 'mp3';
+        formData.append('audio', audioBlob, `preview.${extension}`);
       }
 
       const response = await fetch('/api/admin/voices', {
@@ -142,6 +192,18 @@ const VoiceCreator: React.FC = () => {
         </header>
 
         <main className="space-y-6">
+          {/* API Key */}
+          <div className="space-y-2">
+            <Label htmlFor="apiKey">Maya API Key</Label>
+            <Input
+              id="apiKey"
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="maya_YOUR_API_KEY_HERE"
+            />
+          </div>
+
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">Voice Description</Label>
@@ -149,9 +211,12 @@ const VoiceCreator: React.FC = () => {
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the voice characteristics (e.g., warm, professional, calm female voice)"
+              placeholder="Describe the voice characteristics (e.g., Realistic male voice in the 20s age with a american accent)"
               className="w-full min-h-[100px] p-3 border border-input rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             />
+            <p className="text-xs text-gray-500">
+              Include: age, gender, accent, pitch, timbre, pacing, tone, intensity, domain, role, delivery style
+            </p>
           </div>
 
           {/* Test Text */}
@@ -161,16 +226,35 @@ const VoiceCreator: React.FC = () => {
               id="testText"
               value={testText}
               onChange={(e) => setTestText(e.target.value)}
-              placeholder="Enter text to test the voice"
+              placeholder="Enter text to test the voice. You can use tags like <excited>, <curious>, etc."
               className="w-full min-h-[120px] p-3 border border-input rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             />
+            <p className="text-xs text-gray-500">
+              Tip: Use emotion tags like &lt;excited&gt;, &lt;curious&gt;, &lt;gasp&gt;, &lt;giggle&gt;, &lt;sigh&gt; for expressive speech
+            </p>
+          </div>
+
+          {/* Seed */}
+          <div className="space-y-2">
+            <Label htmlFor="seed">Seed (for reproducibility)</Label>
+            <Input
+              id="seed"
+              type="number"
+              value={seed}
+              onChange={(e) => setSeed(parseInt(e.target.value) || 1000)}
+              placeholder="1000"
+              min="0"
+            />
+            <p className="text-xs text-gray-500">
+              Same seed with same inputs will generate the same voice
+            </p>
           </div>
 
           {/* Generate Button */}
           <div>
             <button
               onClick={handleGenerateVoice}
-              disabled={isGenerating || !description.trim() || !testText.trim()}
+              disabled={isGenerating || !description.trim() || !testText.trim() || !apiKey.trim()}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-white font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: isGenerating ? '#666' : '#262626' }}
               onMouseEnter={(e) => !isGenerating && (e.currentTarget.style.backgroundColor = '#3a3a3a')}
