@@ -7,13 +7,26 @@ interface Props {
 }
 
 const { title = 'Dashboard - Maya Research' } = Astro.props;
+
+// Get user data from middleware (already populated in locals)
+const user = Astro.locals.user;
+
+// Serialize user data for client components
+const userData = user ? {
+	id: user.id,
+	email: user.email,
+	fullName: user.fullName,
+	avatarUrl: user.avatarUrl,
+	isAdmin: user.isAdmin,
+	permissionGranted: user.permissionGranted,
+} : null;
 ---
 
 <Layout title={title}>
 	<div class="flex h-screen overflow-hidden bg-white">
 		<!-- Desktop Sidebar -->
 		<div class="hidden lg:block">
-			<Sidebar client:load />
+			<Sidebar client:load user={userData} />
 		</div>
 		
 		<!-- Main Content -->
@@ -42,6 +55,11 @@ const { title = 'Dashboard - Maya Research' } = Astro.props;
 	</div>
 	
 	<!-- Mobile Sidebar Sheet (via Sidebar component's internal sheet) -->
+	
+	<!-- Pass user data to client components via global -->
+	<script define:vars={{ userData }}>
+		window.__USER_DATA__ = userData;
+	</script>
 </Layout>
 
 <script>

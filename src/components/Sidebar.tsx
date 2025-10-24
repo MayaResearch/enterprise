@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '../lib/hooks/useAuth'
 import { supabase } from '../lib/config/supabase'
 import {
   Sheet,
@@ -15,10 +14,23 @@ interface NavItem {
   icon: React.ReactNode
 }
 
-const Sidebar: React.FC = () => {
+interface UserData {
+  id: string
+  email: string
+  fullName?: string
+  avatarUrl?: string
+  isAdmin?: boolean
+  permissionGranted?: boolean
+}
+
+interface SidebarProps {
+  user: UserData | null
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   const [currentPath, setCurrentPath] = useState<string>('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false)
-  const { user, isAdmin } = useAuth()
+  const isAdmin = user?.isAdmin || false
 
   useEffect(() => {
     setCurrentPath(window.location.pathname)
@@ -311,7 +323,7 @@ const Sidebar: React.FC = () => {
           </div>
           <div className="flex-1 flex items-center min-w-0">
             <span className="text-sm font-medium truncate w-full" style={{ color: '#262626' }}>
-              {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
+              {user?.fullName || user?.email?.split('@')[0] || 'User'}
             </span>
           </div>
           <svg
