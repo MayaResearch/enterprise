@@ -439,22 +439,22 @@ const DevelopersPage: React.FC = () => {
               rel="noopener noreferrer"
             >
               <button className="relative inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-7 px-2 rounded-full text-xm">
+                Contact us for any issue
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={16}
-                  height={16}
+                  width={24}
+                  height={24}
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={2}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-3.5 h-3.5 text-[inherit] opacity-100 mr-1.5"
+                  className="lucide lucide-arrow-up-right w-3.5 h-3.5 text-[inherit] opacity-100 -mr-[2px] ml-[4px]"
                 >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
+                  <path d="M7 7h10v10" />
+                  <path d="M7 17 17 7" />
                 </svg>
-                Contact us for any issue
               </button>
             </a>
           </div>
