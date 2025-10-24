@@ -166,39 +166,69 @@ const AdminManagement: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen w-full px-4 py-8">
+      <div className="flex justify-center min-h-screen w-full px-4 py-8">
         <div className="w-full max-w-5xl">
           {/* Header Skeleton */}
-          <div className="mb-6 space-y-4">
-            <Skeleton className="h-10 w-64" />
-            <Skeleton className="h-5 w-96" />
-          </div>
+          <header className="mb-8">
+            <div className="flex items-start justify-between">
+              <div>
+                <Skeleton className="h-8 w-64 mb-2" />
+                <Skeleton className="h-5 w-96" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-10 w-32 rounded-full" />
+              </div>
+            </div>
+          </header>
 
-          {/* Table Skeleton */}
-          <div className="rounded-lg border border-gray-200 overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="p-2 text-left"><Skeleton className="h-4 w-32" /></th>
-                  <th className="p-2 text-left"><Skeleton className="h-4 w-24" /></th>
-                  <th className="p-2 text-left"><Skeleton className="h-4 w-20" /></th>
-                  <th className="p-2 text-left"><Skeleton className="h-4 w-24" /></th>
-                  <th className="p-2 text-left"><Skeleton className="h-4 w-20" /></th>
-                </tr>
-              </thead>
-              <tbody>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <tr key={i} className="border-b border-gray-100">
-                    <td className="p-2"><Skeleton className="h-4 w-48" /></td>
-                    <td className="p-2"><Skeleton className="h-4 w-32" /></td>
-                    <td className="p-2"><Skeleton className="h-6 w-11 rounded-full" /></td>
-                    <td className="p-2"><Skeleton className="h-4 w-24" /></td>
-                    <td className="p-2"><Skeleton className="h-6 w-11 rounded-full" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <main className="flex flex-col">
+            <section className="mt-7">
+              <div className="relative w-full overflow-auto">
+                <table className="w-full caption-bottom text-sm">
+                  <thead className="[&_tr]:border-b">
+                    <tr className="border-b transition-colors">
+                      <th className="px-2 text-left align-middle font-medium text-muted-foreground h-9 pl-0">
+                        <Skeleton className="h-3 w-16" />
+                      </th>
+                      <th className="px-2 text-left align-middle font-medium text-muted-foreground h-9">
+                        <Skeleton className="h-3 w-20" />
+                      </th>
+                      <th className="px-2 text-left align-middle font-medium text-muted-foreground h-9">
+                        <Skeleton className="h-3 w-14" />
+                      </th>
+                      <th className="px-2 text-left align-middle font-medium text-muted-foreground h-9">
+                        <Skeleton className="h-3 w-16" />
+                      </th>
+                      <th className="px-2 text-left align-middle font-medium text-muted-foreground h-9 pr-0">
+                        <Skeleton className="h-3 w-32" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="[&_tr:last-child]:border-0">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <tr key={i} className="border-b transition-colors hover:bg-muted/50">
+                        <td className="px-2 align-middle py-4 pl-0">
+                          <Skeleton className="h-4 w-48" />
+                        </td>
+                        <td className="px-2 align-middle py-4">
+                          <Skeleton className="h-4 w-32" />
+                        </td>
+                        <td className="px-2 align-middle py-4">
+                          <Skeleton className="h-6 w-11 rounded-full" />
+                        </td>
+                        <td className="px-2 align-middle py-4">
+                          <Skeleton className="h-4 w-24" />
+                        </td>
+                        <td className="px-2 align-middle py-4 pr-0">
+                          <Skeleton className="h-6 w-11 rounded-full" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </main>
         </div>
       </div>
     );
