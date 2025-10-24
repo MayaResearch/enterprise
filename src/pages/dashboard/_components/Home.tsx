@@ -17,7 +17,7 @@ const Home = () => {
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
     >
-      Try API for free
+      Try Api Now
     </a>
   </div>
   <div
