@@ -26,6 +26,8 @@ interface PublicVoice {
   imageUrl: string | null;
   previewUrl: string | null;
   isPublic: boolean;
+  voiceDescription: string | null;
+  voiceText: string | null;
   createdAt: string | Date;
 }
 
@@ -967,12 +969,31 @@ const result = await maya.ttsGenerate({
                               Info
                             </button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-80" align="end">
-                            <div className="space-y-2">
-                              <h4 className="font-medium leading-none">{voice.name}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {voice.description || 'No description available'}
-                              </p>
+                          <PopoverContent className="w-96" align="end">
+                            <div className="space-y-3">
+                              <div>
+                                <h4 className="font-semibold text-base mb-1">{voice.name}</h4>
+                                {voice.description && (
+                                  <p className="text-sm text-gray-600 italic">
+                                    {voice.description}
+                                  </p>
+                                )}
+                              </div>
+                              {voice.voiceDescription && (
+                                <div className="pt-2 border-t border-gray-200">
+                                  <p className="text-xs font-medium text-gray-700 mb-1.5">
+                                    Voice Description
+                                  </p>
+                                  <p className="text-sm text-muted-foreground leading-relaxed">
+                                    {voice.voiceDescription}
+                                  </p>
+                                </div>
+                              )}
+                              {!voice.voiceDescription && !voice.description && (
+                                <p className="text-sm text-muted-foreground">
+                                  No description available
+                                </p>
+                              )}
                             </div>
                           </PopoverContent>
                         </Popover>
