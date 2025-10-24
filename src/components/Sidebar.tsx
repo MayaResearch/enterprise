@@ -165,27 +165,6 @@ const Sidebar: React.FC = () => {
           </h1>
         </div>
 
-        {/* Feedback Button */}
-        <button
-          onClick={() => window.open('https://forms.gle/your-feedback-form', '_blank')}
-          className="flex flex-row items-center gap-1.5 h-8 rounded-lg px-2 mb-[22px] hover:bg-neutral-200/70 dark:hover:bg-neutral-700 text-sm select-none transition-all duration-150 dark:text-white [font-variation-settings:'wght'_370] [font-weight:370]"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={16}
-            height={16}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          <span className="truncate">Give us feedback</span>
-        </button>
-
         {/* Navigation Content */}
         <div className="flex flex-col flex-1 overflow-y-auto">
           {/* Home Navigation - with mb-[22px] */}
@@ -218,8 +197,30 @@ const Sidebar: React.FC = () => {
           )}
         </div>
 
-        {/* User Profile & Logout Button at Bottom */}
-        <div className="mt-auto pt-4 border-t border-gray-200">
+        {/* Feedback & User Profile at Bottom */}
+        <div className="mt-auto pt-4 border-t border-gray-200 space-y-1">
+          {/* Feedback Button */}
+          <button
+            onClick={() => window.open('https://forms.gle/your-feedback-form', '_blank')}
+            className="flex flex-row items-center gap-1.5 w-full h-8 rounded-lg px-2 hover:bg-neutral-200/70 dark:hover:bg-neutral-700 text-sm select-none transition-all duration-150 dark:text-white [font-variation-settings:'wght'_370] [font-weight:370]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={16}
+              height={16}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span className="truncate">Give us feedback</span>
+          </button>
+
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
             className="flex flex-row items-center gap-2 w-full h-10 rounded-lg px-2 hover:bg-neutral-200/70 dark:hover:bg-neutral-700 text-sm select-none transition-all duration-150 dark:text-white"
