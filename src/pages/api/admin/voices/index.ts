@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { voices } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { supabase } from '@/lib/config/supabase';
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
@@ -48,14 +49,12 @@ export const POST: APIRoute = async ({ locals, request }) => {
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
-    const testText = formData.get('testText') as string;
-    const seed = formData.get('seed') as string;
     const imageFile = formData.get('image') as File;
     const audioFile = formData.get('audio') as File;
 
     if (!name || !imageFile || !audioFile) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ error: 'Missing required fields: name, image, audio' }),
         {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
@@ -63,19 +62,70 @@ export const POST: APIRoute = async ({ locals, request }) => {
       );
     }
 
-    // For now, store files as base64 data URLs
-    // TODO: Implement Supabase Storage upload
-    const imageBuffer = await imageFile.arrayBuffer();
-    const imageBase64 = Buffer.from(imageBuffer).toString('base64');
-    const imageUrl = `data:${imageFile.type};base64,${imageBase64}`;
-
-    const audioBuffer = await audioFile.arrayBuffer();
-    const audioBase64 = Buffer.from(audioBuffer).toString('base64');
-    const audioUrl = `data:${audioFile.type};base64,${audioBase64}`;
-
     // Generate a unique voice ID
     const timestamp = Date.now();
     const voiceId = `custom_voice_${timestamp}`;
+    const userId = locals.user.id;
+
+    // Upload image to Supabase Storage
+    const imageExt = imageFile.name.split('.').pop() || 'jpg';
+    const imagePath = `voices/${userId}/${voiceId}/avatar.${imageExt}`;
+    const imageBuffer = await imageFile.arrayBuffer();
+    
+    const { data: imageData, error: imageError } = await supabase.storage
+      .from('voice-assets')
+      .upload(imagePath, imageBuffer, {
+        contentType: imageFile.type,
+        upsert: false,
+      });
+
+    if (imageError) {
+      console.error('Error uploading image:', imageError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to upload image' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Get public URL for image
+    const { data: imageUrlData } = supabase.storage
+      .from('voice-assets')
+      .getPublicUrl(imagePath);
+    const imageUrl = imageUrlData.publicUrl;
+
+    // Upload audio to Supabase Storage
+    const audioExt = audioFile.name.split('.').pop() || 'mp3';
+    const audioPath = `voices/${userId}/${voiceId}/preview.${audioExt}`;
+    const audioBuffer = await audioFile.arrayBuffer();
+    
+    const { data: audioData, error: audioError } = await supabase.storage
+      .from('voice-assets')
+      .upload(audioPath, audioBuffer, {
+        contentType: audioFile.type,
+        upsert: false,
+      });
+
+    if (audioError) {
+      console.error('Error uploading audio:', audioError);
+      // Clean up uploaded image
+      await supabase.storage.from('voice-assets').remove([imagePath]);
+      return new Response(
+        JSON.stringify({ error: 'Failed to upload audio' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Get public URL for audio
+    const { data: audioUrlData } = supabase.storage
+      .from('voice-assets')
+      .getPublicUrl(audioPath);
+    const audioUrl = audioUrlData.publicUrl;
 
     // Insert into database
     const [newVoice] = await db
@@ -86,7 +136,6 @@ export const POST: APIRoute = async ({ locals, request }) => {
         description: description || null,
         imageUrl,
         previewUrl: audioUrl,
-        category: 'custom',
         isPublic: false,
         createdById: locals.user.id,
       })

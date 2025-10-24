@@ -28,15 +28,10 @@ export const apiKeys = pgTable('api_keys', {
 export const voices = pgTable('voices', {
   id: uuid('id').primaryKey().defaultRandom(),
   voiceId: text('voice_id').notNull().unique(), // e.g., "custom_voice_001"
-  name: text('name').notNull(), // Display name
-  description: text('description'),
-  imageUrl: text('image_url'), // Avatar/profile image
-  previewUrl: text('preview_url'), // Audio preview URL
-  category: text('category').notNull().default('custom'), // 'premade', 'custom', 'professional'
-  gender: text('gender'), // 'male', 'female', 'neutral'
-  accent: text('accent'), // 'american', 'british', etc.
-  ageRange: text('age_range'), // 'young', 'middle_aged', 'old'
-  useCase: text('use_case'), // 'conversational', 'narration', etc.
+  name: text('name').notNull(), // Display name (tag name)
+  description: text('description'), // Subtitle/tag description
+  imageUrl: text('image_url'), // Avatar stored in Supabase Storage
+  previewUrl: text('preview_url'), // Audio preview stored in Supabase Storage
   isPublic: boolean('is_public').default(false), // Show in playground
   createdById: uuid('created_by_id').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),

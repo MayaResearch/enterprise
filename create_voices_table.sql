@@ -11,11 +11,6 @@ CREATE TABLE IF NOT EXISTS public.voices (
   description TEXT,
   image_url TEXT,
   preview_url TEXT,
-  category TEXT NOT NULL DEFAULT 'custom',
-  gender TEXT,
-  accent TEXT,
-  age_range TEXT,
-  use_case TEXT,
   is_public BOOLEAN DEFAULT false,
   created_by_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -26,7 +21,6 @@ CREATE TABLE IF NOT EXISTS public.voices (
 CREATE INDEX IF NOT EXISTS idx_voices_voice_id ON public.voices(voice_id);
 CREATE INDEX IF NOT EXISTS idx_voices_is_public ON public.voices(is_public);
 CREATE INDEX IF NOT EXISTS idx_voices_created_by ON public.voices(created_by_id);
-CREATE INDEX IF NOT EXISTS idx_voices_category ON public.voices(category);
 
 -- Enable RLS (Row Level Security)
 ALTER TABLE public.voices ENABLE ROW LEVEL SECURITY;
@@ -58,15 +52,11 @@ CREATE POLICY "Anyone can view public voices"
 --   voice_id,
 --   name,
 --   description,
---   category,
---   gender,
 --   is_public
 -- ) VALUES (
 --   'test_voice_001',
 --   'Test Voice',
 --   'A test voice for demonstration',
---   'custom',
---   'neutral',
 --   true
 -- );
 

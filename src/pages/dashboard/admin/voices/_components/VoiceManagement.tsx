@@ -41,6 +41,7 @@ const VoiceManagement: React.FC = () => {
   // Save voice dialog
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
   const [voiceName, setVoiceName] = useState<string>('');
+  const [voiceDescription, setVoiceDescription] = useState<string>('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -178,9 +179,9 @@ const VoiceManagement: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('name', voiceName);
-      formData.append('description', description);
-      formData.append('testText', testText);
-      formData.append('seed', seed.toString());
+      if (voiceDescription) {
+        formData.append('description', voiceDescription);
+      }
       formData.append('image', imageFile);
       if (audioBlob) {
         const extension = audioMimeType.includes('mp3') ? 'mp3' : 
@@ -197,13 +198,15 @@ const VoiceManagement: React.FC = () => {
         alert('Voice saved successfully!');
         setShowSaveDialog(false);
         setVoiceName('');
+        setVoiceDescription('');
         setGeneratedAudioUrl(null);
         setImageFile(null);
         setImagePreview(null);
         // Switch to manage tab
         setContentTab('manage');
       } else {
-        alert('Failed to save voice');
+        const errorData = await response.json();
+        alert(`Failed to save voice: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error saving voice:', error);
@@ -920,13 +923,13 @@ const result = await maya.createVoice({
               Save Custom Voice
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Provide a name and image for your voice
+              Provide a name, description (subtitle), and image for your voice
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="voiceName" className="text-sm font-medium">Voice Name</label>
+              <label htmlFor="voiceName" className="text-sm font-medium">Voice Name (Tag Name)</label>
               <input
                 id="voiceName"
                 type="text"
@@ -934,6 +937,18 @@ const result = await maya.createVoice({
                 onChange={(e) => setVoiceName(e.target.value)}
                 placeholder="e.g., Professional Sarah"
                 className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="voiceDescription" className="text-sm font-medium">Description (Subtitle)</label>
+              <textarea
+                id="voiceDescription"
+                value={voiceDescription}
+                onChange={(e) => setVoiceDescription(e.target.value)}
+                placeholder="e.g., Warm, friendly voice perfect for customer service"
+                rows={2}
+                className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               />
             </div>
 
