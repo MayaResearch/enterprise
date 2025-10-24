@@ -9,6 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 type CodeTab = 'python' | 'javascript' | 'curl';
 type ContentTab = 'generate' | 'similar';
@@ -953,12 +958,24 @@ const result = await maya.ttsGenerate({
 
                       {/* Action Buttons */}
                       <div className="flex shrink-0 flex-row items-center justify-end gap-1 px-4 py-2">
-                        <button
-                          className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100"
-                          type="button"
-                        >
-                          Info
-                        </button>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button
+                              className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100"
+                              type="button"
+                            >
+                              Info
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80" align="end">
+                            <div className="space-y-2">
+                              <h4 className="font-medium leading-none">{voice.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {voice.description || 'No description available'}
+                              </p>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                         <button
                           onClick={() => {
                             setVoiceId(voice.voiceId);
