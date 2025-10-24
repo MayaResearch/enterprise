@@ -1047,7 +1047,7 @@ const result = await maya.ttsGenerate({
       </div>
 
       {/* Right Side - Code Examples */}
-      <div className="w-[32rem] flex flex-col overflow-hidden bg-[#1e1e1e]">
+      <div className="hidden lg:flex w-[32rem] flex-col overflow-hidden bg-[#1e1e1e]">
         <div className="flex-1 overflow-auto">
           {/* Tabs */}
           <div className="flex items-center border-b border-gray-800 bg-[#1e1e1e]">
