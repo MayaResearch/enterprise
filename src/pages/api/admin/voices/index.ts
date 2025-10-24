@@ -69,9 +69,32 @@ export const POST: APIRoute = async ({ locals, request }) => {
       );
     }
 
-    // Generate a unique voice ID
-    const timestamp = Date.now();
-    const voiceId = `custom_voice_${timestamp}`;
+    // Generate a unique 8-digit alphanumeric voice ID with at most 3-4 alphabets
+    const generateVoiceId = (): string => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const nums = '0123456789';
+      
+      // Generate 3-4 random letters
+      const numLetters = Math.floor(Math.random() * 2) + 3; // 3 or 4 letters
+      const numDigits = 8 - numLetters; // Remaining will be digits
+      
+      let result = '';
+      
+      // Add letters
+      for (let i = 0; i < numLetters; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      // Add digits
+      for (let i = 0; i < numDigits; i++) {
+        result += nums.charAt(Math.floor(Math.random() * nums.length));
+      }
+      
+      // Shuffle the result to mix letters and numbers
+      return result.split('').sort(() => Math.random() - 0.5).join('');
+    };
+    
+    const voiceId = generateVoiceId();
     const userId = locals.user.id;
 
     // Upload image to Supabase Storage
