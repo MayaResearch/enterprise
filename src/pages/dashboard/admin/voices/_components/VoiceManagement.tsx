@@ -19,6 +19,8 @@ interface Voice {
   imageUrl: string | null;
   previewUrl: string | null;
   isPublic: boolean;
+  voiceDescription: string | null;
+  voiceText: string | null;
   createdAt: string | Date;
 }
 
@@ -51,6 +53,15 @@ const VoiceManagement: React.FC = () => {
   const [isLoadingVoices, setIsLoadingVoices] = useState<boolean>(false);
   const [previewPlayingVoiceId, setPreviewPlayingVoiceId] = useState<string | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Edit voice dialog
+  const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
+  const [editingVoice, setEditingVoice] = useState<Voice | null>(null);
+  const [editVoiceName, setEditVoiceName] = useState<string>('');
+  const [editVoiceDescription, setEditVoiceDescription] = useState<string>('');
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   // Fetch voices when switching to manage tab
   React.useEffect(() => {
@@ -260,6 +271,72 @@ const VoiceManagement: React.FC = () => {
       audio.onended = () => setPreviewPlayingVoiceId(null);
       previewAudioRef.current = audio;
       setPreviewPlayingVoiceId(voiceId);
+    }
+  };
+
+  const handleOpenEditDialog = (voice: Voice): void => {
+    setEditingVoice(voice);
+    setEditVoiceName(voice.name);
+    setEditVoiceDescription(voice.description || '');
+    setEditImagePreview(voice.imageUrl);
+    setEditImageFile(null);
+    setShowEditDialog(true);
+  };
+
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEditImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUpdateVoice = async (): Promise<void> => {
+    if (!editingVoice) return;
+    
+    if (!editVoiceName.trim()) {
+      alert('Please provide a voice name');
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('name', editVoiceName);
+      formData.append('description', editVoiceDescription);
+      if (editImageFile) {
+        formData.append('image', editImageFile);
+      }
+
+      const response = await fetch(`/api/admin/voices/${editingVoice.id}`, {
+        method: 'PATCH',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const updatedVoice = await response.json();
+        setVoices(prev => prev.map(v => 
+          v.id === editingVoice.id ? { ...v, ...updatedVoice } : v
+        ));
+        alert('Voice updated successfully!');
+        setShowEditDialog(false);
+        setEditingVoice(null);
+        setEditImageFile(null);
+        setEditImagePreview(null);
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to update voice: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating voice:', error);
+      alert('Failed to update voice');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -690,6 +767,26 @@ const result = await maya.createVoice({
 
                           {/* Action Buttons */}
                           <div className="flex shrink-0 flex-row items-center justify-end gap-2 px-4 py-2">
+                            <button
+                              onClick={() => handleOpenEditDialog(voice)}
+                              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-full border border-gray-200 hover:bg-gray-50"
+                            >
+                              <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="14" 
+                                height="14" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                              >
+                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                                <path d="m15 5 4 4" />
+                              </svg>
+                              Edit
+                            </button>
                             <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-200 bg-white">
                               <span className="text-xs text-gray-600 whitespace-nowrap">Public</span>
                               <Switch
@@ -1006,6 +1103,124 @@ const result = await maya.createVoice({
               onMouseLeave={(e) => !isSaving && (e.currentTarget.style.backgroundColor = '#262626')}
             >
               {isSaving ? 'Saving...' : 'Save Voice'}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Voice Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:rounded-3xl focus-visible:outline-0 max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold leading-6 tracking-tight">
+              Edit Voice
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Update voice name, description (tagline), and image
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Editable Fields */}
+            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-sm font-semibold text-gray-900">Editable Fields</h3>
+              
+              <div className="space-y-2">
+                <label htmlFor="editVoiceName" className="text-sm font-medium">Voice Name</label>
+                <input
+                  id="editVoiceName"
+                  type="text"
+                  value={editVoiceName}
+                  onChange={(e) => setEditVoiceName(e.target.value)}
+                  placeholder="e.g., Professional Sarah"
+                  className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="editVoiceDescription" className="text-sm font-medium">Description (Tagline)</label>
+                <textarea
+                  id="editVoiceDescription"
+                  value={editVoiceDescription}
+                  onChange={(e) => setEditVoiceDescription(e.target.value)}
+                  placeholder="e.g., Warm, friendly voice perfect for customer service"
+                  rows={2}
+                  className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none bg-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="editVoiceImage" className="text-sm font-medium">Voice Avatar Image</label>
+                {editImagePreview && (
+                  <div className="mb-2">
+                    <img src={editImagePreview} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-gray-200" />
+                  </div>
+                )}
+                <input
+                  id="editVoiceImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleEditImageChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Read-only Fields */}
+            <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <h3 className="text-sm font-semibold text-amber-900">Generation Parameters (Read-only)</h3>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-amber-900">Voice Description (Used for Generation)</label>
+                <div className="w-full px-3 py-2 border border-amber-200 rounded-md text-sm bg-amber-50/50 text-gray-700">
+                  {editingVoice?.voiceDescription || 'No description'}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-amber-900">Voice Text (Used for Generation)</label>
+                <div className="w-full px-3 py-2 border border-amber-200 rounded-md text-sm bg-amber-50/50 text-gray-700 max-h-32 overflow-y-auto">
+                  {editingVoice?.voiceText || 'No text'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              onClick={() => setShowEditDialog(false)}
+              className="px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-sm font-medium"
+              disabled={isUpdating}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpdateVoice}
+              disabled={isUpdating || !editVoiceName.trim()}
+              className="px-6 py-2 rounded-full text-white font-medium transition-colors disabled:opacity-50 text-sm flex items-center gap-2"
+              style={{ backgroundColor: isUpdating ? '#666' : '#262626' }}
+              onMouseEnter={(e) => !isUpdating && (e.currentTarget.style.backgroundColor = '#3a3a3a')}
+              onMouseLeave={(e) => !isUpdating && (e.currentTarget.style.backgroundColor = '#262626')}
+            >
+              {isUpdating && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 256 256"
+                  height={16}
+                  width={16}
+                  className="animate-spin"
+                >
+                  <path d="M146.498 47C146.498 56.9411 138.439 65 128.498 65C118.557 65 110.498 56.9411 110.498 47C110.498 37.0589 118.557 29 128.498 29C138.439 29 146.498 37.0589 146.498 47Z" />
+                  <path d="M203.831 91.9468C196.059 98.145 184.734 96.8689 178.535 89.0967C172.337 81.3244 173.613 69.9991 181.386 63.8009C189.158 57.6027 200.483 58.8787 206.681 66.651C212.88 74.4233 211.603 85.7486 203.831 91.9468Z" />
+                  <path d="M204.437 164.795C194.745 162.583 188.681 152.933 190.894 143.241C193.106 133.549 202.756 127.486 212.448 129.698C222.14 131.91 228.203 141.56 225.991 151.252C223.779 160.944 214.129 167.008 204.437 164.795Z" />
+                  <path d="M147.859 210.689C143.546 201.733 147.31 190.975 156.267 186.662C165.223 182.349 175.981 186.113 180.294 195.07C184.607 204.026 180.843 214.784 171.887 219.097C162.93 223.41 152.172 219.646 147.859 210.689Z" />
+                  <path d="M76.7023 195.07C81.0156 186.113 91.773 182.349 100.73 186.662C109.686 190.975 113.45 201.733 109.137 210.689C104.824 219.646 94.0665 223.41 85.1098 219.097C76.1532 214.784 72.389 204.026 76.7023 195.07Z" />
+                  <path d="M44.5487 129.698C54.2406 127.486 63.8907 133.549 66.1028 143.241C68.3149 152.933 62.2514 162.583 52.5595 164.795C42.8676 167.008 33.2175 160.944 31.0054 151.252C28.7933 141.56 34.8568 131.91 44.5487 129.698Z" />
+                  <path d="M75.6108 63.8009C83.3831 69.9991 84.6592 81.3244 78.461 89.0967C72.2628 96.8689 60.9375 98.145 53.1652 91.9468C45.3929 85.7486 44.1168 74.4233 50.315 66.651C56.5132 58.8787 67.8385 57.6027 75.6108 63.8009Z" />
+                </svg>
+              )}
+              {isUpdating ? 'Updating...' : 'Update Voice'}
             </button>
           </div>
         </DialogContent>
