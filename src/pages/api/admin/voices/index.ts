@@ -20,6 +20,11 @@ export const GET: APIRoute = async ({ locals }) => {
       .from(voices)
       .orderBy(voices.createdAt);
 
+    console.log(`📋 Fetching ${allVoices.length} voices for admin`);
+    allVoices.forEach(voice => {
+      console.log(`  - ${voice.name}: imageUrl=${voice.imageUrl ? '✅' : '❌'}, previewUrl=${voice.previewUrl ? '✅' : '❌'}`);
+    });
+
     return new Response(JSON.stringify(allVoices), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -97,6 +102,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
       .from('voice-assets')
       .getPublicUrl(imagePath);
     const imageUrl = imageUrlData.publicUrl;
+    console.log('✅ Image uploaded:', imagePath);
+    console.log('📸 Image URL:', imageUrl);
 
     // Upload audio to Supabase Storage
     const audioExt = audioFile.name.split('.').pop() || 'mp3';
@@ -128,6 +135,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
       .from('voice-assets')
       .getPublicUrl(audioPath);
     const audioUrl = audioUrlData.publicUrl;
+    console.log('✅ Audio uploaded:', audioPath);
+    console.log('🔊 Audio URL:', audioUrl);
 
     // Insert into database
     const [newVoice] = await db
@@ -144,6 +153,13 @@ export const POST: APIRoute = async ({ locals, request }) => {
         createdById: locals.user.id,
       })
       .returning();
+
+    console.log('💾 Saved voice to database:', {
+      id: newVoice.id,
+      name: newVoice.name,
+      imageUrl: newVoice.imageUrl,
+      previewUrl: newVoice.previewUrl,
+    });
 
     return new Response(JSON.stringify(newVoice), {
       status: 201,
