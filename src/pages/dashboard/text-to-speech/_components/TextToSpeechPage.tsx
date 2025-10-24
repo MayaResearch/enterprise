@@ -14,6 +14,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 
 type CodeTab = 'python' | 'javascript' | 'curl';
 type ContentTab = 'generate' | 'similar';
@@ -162,6 +168,7 @@ const TextToSpeechPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<CodeTab>('python');
   const [contentTab, setContentTab] = useState<ContentTab>('generate');
+  const [docSheetOpen, setDocSheetOpen] = useState<boolean>(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioMimeType, setAudioMimeType] = useState<string>('audio/mpeg');
@@ -543,7 +550,7 @@ const result = await maya.ttsGenerate({
 
             {/* Tabs */}
             <div className="flex shrink-0 flex-row items-center justify-between mb-6">
-              <div className="flex w-full justify-start gap-3 overflow-x-auto scrollbar-none md:scrollbar-thin">
+              <div className="flex justify-start gap-3 overflow-x-auto scrollbar-none md:scrollbar-thin">
                 <button
                   type="button"
                   onClick={() => setContentTab('generate')}
@@ -567,6 +574,29 @@ const result = await maya.ttsGenerate({
                   <span className="leading-none">Voice Library</span>
                 </button>
               </div>
+              
+              {/* Documentation Button - Mobile Only */}
+              <button
+                type="button"
+                onClick={() => setDocSheetOpen(true)}
+                className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-gray-200 hover:bg-gray-50 transition-colors shrink-0"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="14" 
+                  height="14" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                Docs
+              </button>
             </div>
 
             {/* Content based on active tab */}
@@ -1282,6 +1312,161 @@ const result = await maya.ttsGenerate({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Documentation Sheet - Mobile Only */}
+      <Sheet open={docSheetOpen} onOpenChange={setDocSheetOpen}>
+        <SheetContent side="right" className="w-full sm:w-[540px] p-0 overflow-y-auto">
+          <div className="flex flex-col h-full bg-[#1e1e1e]">
+            <SheetHeader className="px-6 py-4 border-b border-gray-800">
+              <SheetTitle className="text-white">API Documentation</SheetTitle>
+            </SheetHeader>
+            
+            {/* Tabs */}
+            <div className="flex items-center border-b border-gray-800 bg-[#1e1e1e] px-2">
+              <button
+                onClick={() => setActiveTab('python')}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === 'python'
+                    ? 'text-blue-400 border-blue-400 bg-[#252526]'
+                    : 'text-gray-400 hover:text-gray-300 border-transparent'
+                }`}
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                  <path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/>
+                </svg>
+                Python
+              </button>
+              <button
+                onClick={() => setActiveTab('javascript')}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === 'javascript'
+                    ? 'text-blue-400 border-blue-400 bg-[#252526]'
+                    : 'text-gray-400 hover:text-gray-300 border-transparent'
+                }`}
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                  <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z"/>
+                </svg>
+                Javascript
+              </button>
+              <button
+                onClick={() => setActiveTab('curl')}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === 'curl'
+                    ? 'text-blue-400 border-blue-400 bg-[#252526]'
+                    : 'text-gray-400 hover:text-gray-300 border-transparent'
+                }`}
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="16 18 22 12 16 6"></polyline>
+                  <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                curl
+              </button>
+            </div>
+
+            {/* Code Content */}
+            <div className="relative bg-[#1e1e1e] flex-1 overflow-auto">
+              {/* Copy button */}
+              <button
+                onClick={() => {
+                  let code = '';
+                  if (activeTab === 'python') code = getPythonCode();
+                  else if (activeTab === 'javascript') code = getJavaScriptCode();
+                  else code = getCurlCommand();
+                  navigator.clipboard.writeText(code);
+                }}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors hover:bg-gray-700 rounded z-10"
+                title="Copy code"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+
+              {activeTab === 'python' && (
+                <div className="pb-4">
+                  {/* Install command */}
+                  <div className="px-4 pt-4 pb-4">
+                    <pre className="m-0 p-4 overflow-auto" style={{
+                      background: 'rgb(30, 30, 30)',
+                      fontSize: '13px',
+                      fontFamily: 'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+                      color: 'rgb(212, 212, 212)',
+                    }}>
+                      <code>pip <span style={{ color: 'rgb(220, 220, 170)' }}>install</span> maya-py</code>
+                    </pre>
+                  </div>
+
+                  {/* Code content */}
+                  <div className="px-4">
+                    <pre className="m-0 p-4 overflow-auto" style={{
+                      background: 'rgb(30, 30, 30)',
+                      fontSize: '13px',
+                      fontFamily: 'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+                      color: 'rgb(212, 212, 212)',
+                      lineHeight: '1.5',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word'
+                    }}>
+                      <code>{getPythonCode()}</code>
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'javascript' && (
+                <div className="pb-4">
+                  {/* Install command */}
+                  <div className="px-4 pt-4 pb-4">
+                    <pre className="m-0 p-4 overflow-auto" style={{
+                      background: 'rgb(30, 30, 30)',
+                      fontSize: '13px',
+                      fontFamily: 'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+                      color: 'rgb(212, 212, 212)',
+                    }}>
+                      <code>npm <span style={{ color: 'rgb(220, 220, 170)' }}>install</span> maya-js</code>
+                    </pre>
+                  </div>
+
+                  {/* Code content */}
+                  <div className="px-4">
+                    <pre className="m-0 p-4 overflow-auto" style={{
+                      background: 'rgb(30, 30, 30)',
+                      fontSize: '13px',
+                      fontFamily: 'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+                      color: 'rgb(212, 212, 212)',
+                      lineHeight: '1.5',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word'
+                    }}>
+                      <code>{getJavaScriptCode()}</code>
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'curl' && (
+                <div className="pb-4">
+                  <div className="px-4 pt-4">
+                    <pre className="m-0 p-4 overflow-auto" style={{
+                      background: 'rgb(30, 30, 30)',
+                      fontSize: '13px',
+                      fontFamily: 'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+                      color: 'rgb(212, 212, 212)',
+                      lineHeight: '1.5',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all'
+                    }}>
+                      <code>{getCurlCommand()}</code>
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

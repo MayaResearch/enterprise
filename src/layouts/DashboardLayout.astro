@@ -11,10 +11,49 @@ const { title = 'Dashboard - Maya Research' } = Astro.props;
 
 <Layout title={title}>
 	<div class="flex h-screen overflow-hidden bg-white">
-		<Sidebar client:load />
+		<!-- Desktop Sidebar -->
+		<div class="hidden lg:block">
+			<Sidebar client:load />
+		</div>
+		
+		<!-- Main Content -->
 		<div class="flex flex-1 flex-col overflow-hidden">
+			<!-- Mobile Top Bar (visible only on mobile) -->
+			<div class="lg:hidden border-b border-gray-200 bg-white">
+				<div class="flex items-center justify-between h-16 px-4">
+					<h1 class="text-lg font-bold text-gray-900">Maya Research</h1>
+					<button
+						id="mobile-menu-button"
+						type="button"
+						class="inline-flex items-center justify-center p-2 rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
+						aria-expanded="false"
+					>
+						<span class="sr-only">Open menu</span>
+						<svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+						</svg>
+					</button>
+				</div>
+			</div>
+			
+			<!-- Page Content -->
 			<slot />
 		</div>
 	</div>
+	
+	<!-- Mobile Sidebar Sheet (via Sidebar component's internal sheet) -->
 </Layout>
+
+<script>
+	// Mobile menu toggle handled by Sidebar component
+	document.addEventListener('DOMContentLoaded', () => {
+		const menuButton = document.getElementById('mobile-menu-button');
+		if (menuButton) {
+			menuButton.addEventListener('click', () => {
+				// Dispatch custom event that Sidebar component will listen to
+				window.dispatchEvent(new CustomEvent('toggle-mobile-menu'));
+			});
+		}
+	});
+</script>
 
