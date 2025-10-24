@@ -23,7 +23,10 @@ declare global {
   }
 }
 
-export const onRequest = defineMiddleware(async ({ request, locals, cookies }, next) => {
+export const onRequest = defineMiddleware(async ({ request, locals, cookies, redirect }, next) => {
+  const url = new URL(request.url);
+  const pathname = url.pathname;
+
   // Create a Supabase client for server-side
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
@@ -102,6 +105,28 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies }, n
     } else {
       locals.user = null;
       console.log('ℹ️ No authentication found in request');
+    }
+  }
+
+  // Server-side redirects based on authentication
+  const isAuthenticated = !!locals.user;
+
+  // Redirect authenticated users from login page to dashboard
+  if (isAuthenticated && pathname === '/login') {
+    return redirect('/dashboard', 302);
+  }
+
+  // Redirect unauthenticated users from dashboard to login
+  if (!isAuthenticated && pathname.startsWith('/dashboard')) {
+    return redirect('/login', 302);
+  }
+
+  // Redirect home page based on authentication
+  if (pathname === '/') {
+    if (isAuthenticated) {
+      return redirect('/dashboard', 302);
+    } else {
+      return redirect('/login', 302);
     }
   }
 
