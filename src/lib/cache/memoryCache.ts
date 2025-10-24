@@ -12,12 +12,14 @@ class MemoryCache {
   private cache: Map<string, CacheEntry<any>>;
   private defaultTTL: number; // Time to live in milliseconds
 
-  constructor(defaultTTL: number = 5 * 60 * 1000) { // Default 5 minutes
+  constructor(defaultTTL: number = Infinity) { // No expiration by default (we control all updates)
     this.cache = new Map();
     this.defaultTTL = defaultTTL;
     
-    // Cleanup expired entries every minute
-    setInterval(() => this.cleanup(), 60 * 1000);
+    // Cleanup expired entries every minute (only if TTL is set)
+    if (defaultTTL !== Infinity) {
+      setInterval(() => this.cleanup(), 60 * 1000);
+    }
   }
 
   /**

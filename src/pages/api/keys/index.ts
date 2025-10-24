@@ -60,8 +60,8 @@ export const GET: APIRoute = async ({ locals }) => {
       keyPreview: key.keyHash.slice(-4),
     }));
 
-    // Store in cache for 5 minutes
-    memoryCache.set(cacheKey, keysWithPreview, 5 * 60 * 1000);
+    // Store in cache indefinitely (we'll update directly on mutations)
+    memoryCache.set(cacheKey, keysWithPreview);
 
     return new Response(JSON.stringify(keysWithPreview), {
       status: 200,
@@ -122,10 +122,19 @@ export const POST: APIRoute = async ({ locals, request }) => {
         createdAt: apiKeys.createdAt,
       });
 
-    // Invalidate cache for this user since we added a new key
+    // Update cache directly by adding the new key
     const cacheKey = cacheKeys.userApiKeys(user.id);
-    memoryCache.delete(cacheKey);
-    console.log('🗑️  Invalidated cache for user:', user.email);
+    const cachedKeys = memoryCache.get<any[]>(cacheKey);
+    
+    if (cachedKeys) {
+      // Add new key to existing cache
+      const newKeyWithPreview = { ...newKey, keyPreview };
+      memoryCache.set(cacheKey, [newKeyWithPreview, ...cachedKeys]);
+      console.log('✅ Updated cache with new key for user:', user.email);
+    } else {
+      // No cache yet - will be populated on next GET
+      console.log('ℹ️  No cache to update for user:', user.email);
+    }
 
     // Return the full key only once during creation, along with preview
     return new Response(JSON.stringify({

@@ -69,10 +69,19 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
       });
     }
 
-    // Invalidate cache for this user since we updated a key
+    // Update cache directly by modifying the specific key
     const cacheKey = cacheKeys.userApiKeys(user.id);
-    memoryCache.delete(cacheKey);
-    console.log('🗑️  Invalidated cache for user:', user.email);
+    const cachedKeys = memoryCache.get<any[]>(cacheKey);
+    
+    if (cachedKeys) {
+      const updatedKeys = cachedKeys.map(key => 
+        key.id === id ? { ...key, ...updateData } : key
+      );
+      memoryCache.set(cacheKey, updatedKeys);
+      console.log('✅ Updated cache for key:', id, 'user:', user.email);
+    } else {
+      console.log('ℹ️  No cache to update for user:', user.email);
+    }
 
     // Add keyPreview for display
     const response = {
@@ -124,10 +133,17 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
       });
     }
 
-    // Invalidate cache for this user since we deleted a key
+    // Update cache directly by removing the deleted key
     const cacheKey = cacheKeys.userApiKeys(user.id);
-    memoryCache.delete(cacheKey);
-    console.log('🗑️  Invalidated cache for user:', user.email);
+    const cachedKeys = memoryCache.get<any[]>(cacheKey);
+    
+    if (cachedKeys) {
+      const updatedKeys = cachedKeys.filter(key => key.id !== id);
+      memoryCache.set(cacheKey, updatedKeys);
+      console.log('✅ Removed key from cache:', id, 'user:', user.email);
+    } else {
+      console.log('ℹ️  No cache to update for user:', user.email);
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
