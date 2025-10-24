@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { db } from './lib/db';
 import { users } from './lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { memoryCache, cacheKeys } from './lib/cache/memoryCache';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -62,40 +63,59 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
       });
 
       if (!error && session?.user) {
-        // Fetch user data from public.users (source of truth for permissions)
-        try {
-          const [dbUser] = await db
-            .select({
-              id: users.id,
-              email: users.email,
-              fullName: users.fullName,
-              avatarUrl: users.avatarUrl,
-              isAdmin: users.isAdmin,
-              permissionGranted: users.permissionGranted,
-            })
-            .from(users)
-            .where(eq(users.id, session.user.id))
-            .limit(1);
+        const userId = session.user.id;
+        const cacheKey = cacheKeys.userData(userId);
+        
+        // Try to get from cache first
+        let dbUser = memoryCache.get<any>(cacheKey);
+        
+        if (dbUser) {
+          console.log('✅ Cache HIT for user:', session.user.email);
+        } else {
+          console.log('❌ Cache MISS for user:', session.user.email, '- Fetching from DB');
+          
+          // Fetch user data from public.users (source of truth for permissions)
+          try {
+            const [fetchedUser] = await db
+              .select({
+                id: users.id,
+                email: users.email,
+                fullName: users.fullName,
+                avatarUrl: users.avatarUrl,
+                isAdmin: users.isAdmin,
+                permissionGranted: users.permissionGranted,
+              })
+              .from(users)
+              .where(eq(users.id, userId))
+              .limit(1);
 
-          if (dbUser) {
-            locals.user = {
-              id: dbUser.id,
-              email: dbUser.email,
-              fullName: dbUser.fullName || undefined,
-              avatarUrl: dbUser.avatarUrl || undefined,
-              isAdmin: dbUser.isAdmin,
-              permissionGranted: dbUser.permissionGranted,
-            };
-            console.log('✅ Server-side auth: User authenticated from DB', locals.user.email, 
-              `[isAdmin: ${locals.user.isAdmin}, permission: ${locals.user.permissionGranted}]`);
-          } else {
+            if (fetchedUser) {
+              dbUser = fetchedUser;
+              // Cache indefinitely (we'll update directly on mutations)
+              memoryCache.set(cacheKey, dbUser);
+            } else {
+              locals.user = null;
+              console.log('⚠️ User not found in database:', session.user.email);
+              return;
+            }
+          } catch (dbError) {
+            console.error('❌ Error fetching user from database:', dbError);
             locals.user = null;
-            console.log('⚠️ User not found in database:', session.user.email);
+            return;
           }
-        } catch (dbError) {
-          console.error('❌ Error fetching user from database:', dbError);
-          locals.user = null;
         }
+
+        // Set locals.user from cache or DB
+        locals.user = {
+          id: dbUser.id,
+          email: dbUser.email,
+          fullName: dbUser.fullName || undefined,
+          avatarUrl: dbUser.avatarUrl || undefined,
+          isAdmin: dbUser.isAdmin,
+          permissionGranted: dbUser.permissionGranted,
+        };
+        console.log('✅ Server-side auth: User authenticated', locals.user.email, 
+          `[isAdmin: ${locals.user.isAdmin}, permission: ${locals.user.permissionGranted}]`);
       } else {
         locals.user = null;
         if (error) {
@@ -115,38 +135,53 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
         const { data: { user }, error } = await supabase.auth.getUser(token);
         
         if (!error && user) {
-          // Fetch user data from public.users (source of truth for permissions)
-          try {
-            const [dbUser] = await db
-              .select({
-                id: users.id,
-                email: users.email,
-                fullName: users.fullName,
-                avatarUrl: users.avatarUrl,
-                isAdmin: users.isAdmin,
-                permissionGranted: users.permissionGranted,
-              })
-              .from(users)
-              .where(eq(users.id, user.id))
-              .limit(1);
+          const userId = user.id;
+          const cacheKey = cacheKeys.userData(userId);
+          
+          // Try to get from cache first
+          let dbUser = memoryCache.get<any>(cacheKey);
+          
+          if (!dbUser) {
+            // Fetch user data from public.users (source of truth for permissions)
+            try {
+              const [fetchedUser] = await db
+                .select({
+                  id: users.id,
+                  email: users.email,
+                  fullName: users.fullName,
+                  avatarUrl: users.avatarUrl,
+                  isAdmin: users.isAdmin,
+                  permissionGranted: users.permissionGranted,
+                })
+                .from(users)
+                .where(eq(users.id, userId))
+                .limit(1);
 
-            if (dbUser) {
-              locals.user = {
-                id: dbUser.id,
-                email: dbUser.email,
-                fullName: dbUser.fullName || undefined,
-                avatarUrl: dbUser.avatarUrl || undefined,
-                isAdmin: dbUser.isAdmin,
-                permissionGranted: dbUser.permissionGranted,
-              };
-              console.log('✅ Server-side auth: User authenticated via Bearer token from DB', locals.user.email);
-            } else {
+              if (fetchedUser) {
+                dbUser = fetchedUser;
+                // Cache indefinitely (we'll update directly on mutations)
+                memoryCache.set(cacheKey, dbUser);
+              } else {
+                locals.user = null;
+                return;
+              }
+            } catch (dbError) {
+              console.error('❌ Error fetching user from database:', dbError);
               locals.user = null;
+              return;
             }
-          } catch (dbError) {
-            console.error('❌ Error fetching user from database:', dbError);
-            locals.user = null;
           }
+
+          // Set locals.user from cache or DB
+          locals.user = {
+            id: dbUser.id,
+            email: dbUser.email,
+            fullName: dbUser.fullName || undefined,
+            avatarUrl: dbUser.avatarUrl || undefined,
+            isAdmin: dbUser.isAdmin,
+            permissionGranted: dbUser.permissionGranted,
+          };
+          console.log('✅ Server-side auth: User authenticated via Bearer token', locals.user.email);
         } else {
           locals.user = null;
         }

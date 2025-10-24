@@ -2,11 +2,9 @@ import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { memoryCache } from '@/lib/cache/memoryCache';
+import { memoryCache, cacheKeys } from '@/lib/cache/memoryCache';
 
 export const prerender = false;
-
-const ADMIN_USERS_CACHE_KEY = 'admin:all-users';
 
 // PATCH - Update user permissions (admin only)
 export const PATCH: APIRoute = async ({ locals, request, params }) => {
@@ -69,17 +67,30 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
       });
     }
 
-    // Update cache directly by modifying the specific user
-    const cachedUsers = memoryCache.get<any[]>(ADMIN_USERS_CACHE_KEY);
+    // Update cache: 1) User's own data cache, 2) Admin users list cache
+    
+    // 1. Update the user's own data cache (for middleware and /api/user/me)
+    const userDataCacheKey = cacheKeys.userData(id);
+    memoryCache.set(userDataCacheKey, {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullName,
+      avatarUrl: null, // Not in updatedUser
+      isAdmin: updatedUser.isAdmin,
+      permissionGranted: updatedUser.permissionGranted,
+    });
+    console.log('✅ Updated user data cache for:', updatedUser.email);
+    
+    // 2. Update the admin users list cache
+    const allUsersCacheKey = cacheKeys.allUsers();
+    const cachedUsers = memoryCache.get<any[]>(allUsersCacheKey);
     
     if (cachedUsers) {
       const updatedUsers = cachedUsers.map(u => 
         u.id === id ? { ...u, permissionGranted, updatedAt: updatedUser.createdAt } : u
       );
-      memoryCache.set(ADMIN_USERS_CACHE_KEY, updatedUsers);
-      console.log('✅ Updated cache for user:', id, updatedUser.email);
-    } else {
-      console.log('ℹ️ No cache to update for admin users');
+      memoryCache.set(allUsersCacheKey, updatedUsers);
+      console.log('✅ Updated admin users list cache');
     }
 
     return new Response(JSON.stringify(updatedUser), {

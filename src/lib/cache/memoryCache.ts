@@ -111,5 +111,7 @@ export const memoryCache = new MemoryCache();
 export const cacheKeys = {
   userApiKeys: (userId: string) => `user:${userId}:api-keys`,
   apiKey: (userId: string, keyId: string) => `user:${userId}:api-key:${keyId}`,
+  userData: (userId: string) => `user:${userId}:data`,
+  allUsers: () => `admin:all-users`,
 };
 

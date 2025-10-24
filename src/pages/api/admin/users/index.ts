@@ -2,11 +2,9 @@ import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { desc } from 'drizzle-orm';
-import { memoryCache } from '@/lib/cache/memoryCache';
+import { memoryCache, cacheKeys } from '@/lib/cache/memoryCache';
 
 export const prerender = false;
-
-const ADMIN_USERS_CACHE_KEY = 'admin:all-users';
 
 // GET - List all users (admin only)
 export const GET: APIRoute = async ({ locals, url }) => {
@@ -29,14 +27,15 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     // Check if hard refresh is requested
     const forceRefresh = url.searchParams.get('refresh') === 'true';
+    const cacheKey = cacheKeys.allUsers();
 
     if (forceRefresh) {
       // Hard refresh: invalidate cache and force DB query
-      memoryCache.delete(ADMIN_USERS_CACHE_KEY);
+      memoryCache.delete(cacheKey);
       console.log('🔄 Hard refresh requested for admin users');
     } else {
       // Try to get from cache first
-      const cachedUsers = memoryCache.get<any[]>(ADMIN_USERS_CACHE_KEY);
+      const cachedUsers = memoryCache.get<any[]>(cacheKey);
       
       if (cachedUsers) {
         console.log('✅ Cache HIT for admin users list');
@@ -63,7 +62,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
       .orderBy(desc(users.createdAt));
 
     // Store in cache indefinitely (we'll update directly on mutations)
-    memoryCache.set(ADMIN_USERS_CACHE_KEY, allUsers);
+    memoryCache.set(cacheKey, allUsers);
 
     return new Response(JSON.stringify(allUsers), {
       status: 200,

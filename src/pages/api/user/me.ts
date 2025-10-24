@@ -1,11 +1,9 @@
 import type { APIRoute } from 'astro';
-import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 
 export const prerender = false;
 
-// GET - Get current user's info from database
+// GET - Get current user's info from cache (via middleware)
+// Middleware already fetches and caches user data from public.users
 export const GET: APIRoute = async ({ locals }) => {
   try {
     const user = locals.user;
@@ -16,7 +14,8 @@ export const GET: APIRoute = async ({ locals }) => {
       });
     }
 
-    // Return the user data already fetched by middleware
+    // Return the user data already fetched and cached by middleware
+    // This is super fast - no DB query needed!
     return new Response(JSON.stringify({
       id: user.id,
       email: user.email,
