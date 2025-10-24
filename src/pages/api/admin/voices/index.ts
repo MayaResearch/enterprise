@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { voices } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { supabase } from '@/lib/config/supabase';
+import { supabaseAdmin } from '@/lib/config/supabase';
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
@@ -72,7 +72,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
     const imagePath = `voices/${userId}/${voiceId}/avatar.${imageExt}`;
     const imageBuffer = await imageFile.arrayBuffer();
     
-    const { data: imageData, error: imageError } = await supabase.storage
+    const { data: imageData, error: imageError } = await supabaseAdmin.storage
       .from('voice-assets')
       .upload(imagePath, imageBuffer, {
         contentType: imageFile.type,
@@ -91,7 +91,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
     }
 
     // Get public URL for image
-    const { data: imageUrlData } = supabase.storage
+    const { data: imageUrlData } = supabaseAdmin.storage
       .from('voice-assets')
       .getPublicUrl(imagePath);
     const imageUrl = imageUrlData.publicUrl;
@@ -101,7 +101,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
     const audioPath = `voices/${userId}/${voiceId}/preview.${audioExt}`;
     const audioBuffer = await audioFile.arrayBuffer();
     
-    const { data: audioData, error: audioError } = await supabase.storage
+    const { data: audioData, error: audioError } = await supabaseAdmin.storage
       .from('voice-assets')
       .upload(audioPath, audioBuffer, {
         contentType: audioFile.type,
@@ -111,7 +111,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
     if (audioError) {
       console.error('Error uploading audio:', audioError);
       // Clean up uploaded image
-      await supabase.storage.from('voice-assets').remove([imagePath]);
+      await supabaseAdmin.storage.from('voice-assets').remove([imagePath]);
       return new Response(
         JSON.stringify({ error: 'Failed to upload audio' }),
         {
@@ -122,7 +122,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
     }
 
     // Get public URL for audio
-    const { data: audioUrlData } = supabase.storage
+    const { data: audioUrlData } = supabaseAdmin.storage
       .from('voice-assets')
       .getPublicUrl(audioPath);
     const audioUrl = audioUrlData.publicUrl;
