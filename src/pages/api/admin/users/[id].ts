@@ -2,9 +2,26 @@ import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { supabase } from '@/lib/config/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export const prerender = false;
+
+// Create admin client with service role key
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseServiceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.error('Missing Supabase admin credentials');
+}
+
+const supabaseAdmin = supabaseUrl && supabaseServiceRoleKey 
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null;
 
 // PATCH - Update user permissions (admin only)
 export const PATCH: APIRoute = async ({ locals, request, params }) => {
@@ -67,23 +84,39 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
     }
 
     // Also update in Supabase auth user metadata
-    try {
-      const { error: supabaseError } = await supabase.auth.admin.updateUserById(
-        id,
-        {
-          user_metadata: {
-            permission_granted: permissionGranted,
-          },
-        }
-      );
+    if (supabaseAdmin) {
+      try {
+        // First, get the current user to preserve existing metadata
+        const { data: authUser, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(id);
+        
+        if (getUserError) {
+          console.error('Error fetching user from Supabase:', getUserError);
+        } else {
+          // Merge with existing metadata to preserve other fields
+          const currentMetadata = authUser.user.user_metadata || {};
+          
+          const { error: supabaseError } = await supabaseAdmin.auth.admin.updateUserById(
+            id,
+            {
+              user_metadata: {
+                ...currentMetadata,
+                permission_granted: permissionGranted,
+                is_admin: updatedUser.isAdmin, // Also sync is_admin
+              },
+            }
+          );
 
-      if (supabaseError) {
-        console.error('Error updating Supabase user metadata:', supabaseError);
-        // Continue anyway - local DB is updated
+          if (supabaseError) {
+            console.error('Error updating Supabase user metadata:', supabaseError);
+          } else {
+            console.log('✅ Successfully updated Supabase user metadata for:', updatedUser.email);
+          }
+        }
+      } catch (error) {
+        console.error('Error updating Supabase:', error);
       }
-    } catch (error) {
-      console.error('Error updating Supabase:', error);
-      // Continue anyway - local DB is updated
+    } else {
+      console.warn('⚠️ Supabase admin client not available - metadata not synced');
     }
 
     return new Response(JSON.stringify(updatedUser), {
