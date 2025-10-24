@@ -23,7 +23,7 @@ declare global {
   namespace App {
     interface Locals {
       user: AuthUser | null;
-      supabase: ReturnType<typeof createClient>;
+      supabase: any; // Use any to avoid type conflicts with different Supabase client configurations
     }
   }
 }
@@ -96,12 +96,13 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
             } else {
               locals.user = null;
               console.log('⚠️ User not found in database:', session.user.email);
-              return;
+              return next();
             }
           } catch (dbError) {
             console.error('❌ Error fetching user from database:', dbError);
             locals.user = null;
-            return;
+            // Continue anyway - user will just appear as not authenticated
+            return next();
           }
         }
 
@@ -163,12 +164,13 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
                 memoryCache.set(cacheKey, dbUser);
               } else {
                 locals.user = null;
-                return;
+                return next();
               }
             } catch (dbError) {
               console.error('❌ Error fetching user from database:', dbError);
               locals.user = null;
-              return;
+              // Continue anyway - user will just appear as not authenticated
+              return next();
             }
           }
 
