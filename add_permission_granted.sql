@@ -8,6 +8,8 @@ ALTER TABLE public.users
 ADD COLUMN IF NOT EXISTS permission_granted BOOLEAN NOT NULL DEFAULT false;
 
 -- Update the trigger function to include permission_granted
+-- Note: ON CONFLICT DO NOTHING ensures we only create the user once
+-- After that, public.users is the source of truth for permissions
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -33,51 +35,51 @@ BEGIN
     NOW(),
     NOW()
   )
-  ON CONFLICT (id) DO UPDATE
-  SET
-    email = EXCLUDED.email,
-    full_name = EXCLUDED.full_name,
-    avatar_url = EXCLUDED.avatar_url,
-    is_admin = EXCLUDED.is_admin,
-    permission_granted = EXCLUDED.permission_granted,
-    updated_at = NOW();
+  ON CONFLICT (id) DO NOTHING;  -- Don't overwrite existing users!
   
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Recreate the trigger to only fire on INSERT (not UPDATE)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
 -- ============================================================================
 -- FIRST TIME SETUP: MAKE YOURSELF AN ADMIN
 -- ============================================================================
--- Step 1: Update the database (replace with your email)
+-- Simply update the database (replace with your email)
 UPDATE public.users 
 SET is_admin = true, permission_granted = true 
 WHERE email = 'your-email@example.com';
 
--- Step 2: MANUALLY update Supabase Auth metadata (REQUIRED for first admin):
---   Go to: Supabase Dashboard → Authentication → Users
---   Find your user → Click to expand → Edit User Metadata
---   Add this JSON to user_metadata:
---   {
---     "is_admin": true,
---     "permission_granted": true
---   }
---   Save and log out/log in again
-
--- Step 3: After logging back in, you can access /dashboard/admin
+-- That's it! Log out and log back in to see the changes.
+-- The middleware will read from public.users and give you admin access.
 
 -- ============================================================================
--- GRANT PERMISSION TO OTHER USERS (via Admin Panel)
+-- GRANT PERMISSION TO OTHER USERS
 -- ============================================================================
--- After you're an admin, use the Admin Management page at /dashboard/admin
--- to grant permissions to other users. This will:
--- 1. Update public.users table
--- 2. Update in-memory cache for fast access
--- 3. User needs to log out/log in to see changes (trigger syncs metadata)
+-- Option 1: Use the Admin Management page at /dashboard/admin (recommended)
+-- - Visual interface to toggle permissions
+-- - Automatically updates database and cache
+-- - User just needs to log out/log in
 
--- OR manually via SQL:
--- UPDATE public.users 
--- SET permission_granted = true 
--- WHERE email = 'another-user@example.com';
--- (User needs to log out/log in for the trigger to sync metadata)
+-- Option 2: Manually via SQL
+UPDATE public.users 
+SET permission_granted = true 
+WHERE email = 'another-user@example.com';
+-- User needs to log out/log in to see changes
+
+-- ============================================================================
+-- HOW IT WORKS
+-- ============================================================================
+-- 1. Trigger only fires on INSERT (new user signup)
+--    - Creates user in public.users with default permissions
+-- 2. Admin updates permissions in public.users (via /dashboard/admin or SQL)
+-- 3. Middleware reads from public.users for permission checks
+-- 4. public.users is the source of truth for permissions
+-- 5. No more auth.users metadata overwrites!
 

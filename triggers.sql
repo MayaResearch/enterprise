@@ -53,10 +53,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Step 4: Create the trigger
+-- Step 4: Create the trigger (only on INSERT, not UPDATE)
+-- This ensures the trigger only fires when a NEW user signs up
+-- Updates to auth.users (like login, session refresh) won't overwrite public.users
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
-  AFTER INSERT OR UPDATE ON auth.users
+  AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 

@@ -1,5 +1,8 @@
 import { defineMiddleware } from 'astro:middleware';
 import { createClient } from '@supabase/supabase-js';
+import { db } from './lib/db';
+import { users } from './lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -59,17 +62,40 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
       });
 
       if (!error && session?.user) {
-        // Extract user information
-        locals.user = {
-          id: session.user.id,
-          email: session.user.email!,
-          fullName: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
-          avatarUrl: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
-          isAdmin: session.user.user_metadata?.is_admin || false,
-          permissionGranted: session.user.user_metadata?.permission_granted || false,
-        };
+        // Fetch user data from public.users (source of truth for permissions)
+        try {
+          const [dbUser] = await db
+            .select({
+              id: users.id,
+              email: users.email,
+              fullName: users.fullName,
+              avatarUrl: users.avatarUrl,
+              isAdmin: users.isAdmin,
+              permissionGranted: users.permissionGranted,
+            })
+            .from(users)
+            .where(eq(users.id, session.user.id))
+            .limit(1);
 
-        console.log('✅ Server-side auth: User authenticated', locals.user.email);
+          if (dbUser) {
+            locals.user = {
+              id: dbUser.id,
+              email: dbUser.email,
+              fullName: dbUser.fullName || undefined,
+              avatarUrl: dbUser.avatarUrl || undefined,
+              isAdmin: dbUser.isAdmin,
+              permissionGranted: dbUser.permissionGranted,
+            };
+            console.log('✅ Server-side auth: User authenticated from DB', locals.user.email, 
+              `[isAdmin: ${locals.user.isAdmin}, permission: ${locals.user.permissionGranted}]`);
+          } else {
+            locals.user = null;
+            console.log('⚠️ User not found in database:', session.user.email);
+          }
+        } catch (dbError) {
+          console.error('❌ Error fetching user from database:', dbError);
+          locals.user = null;
+        }
       } else {
         locals.user = null;
         if (error) {
@@ -89,15 +115,38 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
         const { data: { user }, error } = await supabase.auth.getUser(token);
         
         if (!error && user) {
-          locals.user = {
-            id: user.id,
-            email: user.email!,
-            fullName: user.user_metadata?.full_name || user.user_metadata?.name,
-            avatarUrl: user.user_metadata?.avatar_url || user.user_metadata?.picture,
-            isAdmin: user.user_metadata?.is_admin || false,
-            permissionGranted: user.user_metadata?.permission_granted || false,
-          };
-          console.log('✅ Server-side auth: User authenticated via Bearer token', locals.user.email);
+          // Fetch user data from public.users (source of truth for permissions)
+          try {
+            const [dbUser] = await db
+              .select({
+                id: users.id,
+                email: users.email,
+                fullName: users.fullName,
+                avatarUrl: users.avatarUrl,
+                isAdmin: users.isAdmin,
+                permissionGranted: users.permissionGranted,
+              })
+              .from(users)
+              .where(eq(users.id, user.id))
+              .limit(1);
+
+            if (dbUser) {
+              locals.user = {
+                id: dbUser.id,
+                email: dbUser.email,
+                fullName: dbUser.fullName || undefined,
+                avatarUrl: dbUser.avatarUrl || undefined,
+                isAdmin: dbUser.isAdmin,
+                permissionGranted: dbUser.permissionGranted,
+              };
+              console.log('✅ Server-side auth: User authenticated via Bearer token from DB', locals.user.email);
+            } else {
+              locals.user = null;
+            }
+          } catch (dbError) {
+            console.error('❌ Error fetching user from database:', dbError);
+            locals.user = null;
+          }
         } else {
           locals.user = null;
         }
