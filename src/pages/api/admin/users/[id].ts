@@ -34,22 +34,29 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
     }
 
     const body = await request.json();
-    const { permissionGranted } = body;
+    const { permissionGranted, isAdmin } = body;
 
-    if (typeof permissionGranted !== 'boolean') {
-      return new Response(JSON.stringify({ error: 'Invalid permission value' }), {
+    // Validate that at least one field is being updated
+    if (typeof permissionGranted !== 'boolean' && typeof isAdmin !== 'boolean') {
+      return new Response(JSON.stringify({ error: 'Invalid request - must update either permissionGranted or isAdmin' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
+    // Build update object dynamically
+    const updateData: any = { updatedAt: new Date() };
+    if (typeof permissionGranted === 'boolean') {
+      updateData.permissionGranted = permissionGranted;
+    }
+    if (typeof isAdmin === 'boolean') {
+      updateData.isAdmin = isAdmin;
+    }
+
     // Update in public.users database
     const [updatedUser] = await db
       .update(users)
-      .set({ 
-        permissionGranted,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(users.id, id))
       .returning({
         id: users.id,
@@ -87,7 +94,12 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
     
     if (cachedUsers) {
       const updatedUsers = cachedUsers.map(u => 
-        u.id === id ? { ...u, permissionGranted, updatedAt: updatedUser.createdAt } : u
+        u.id === id ? { 
+          ...u, 
+          permissionGranted: updatedUser.permissionGranted,
+          isAdmin: updatedUser.isAdmin,
+          updatedAt: updatedUser.createdAt 
+        } : u
       );
       memoryCache.set(allUsersCacheKey, updatedUsers);
       console.log('✅ Updated admin users list cache');
