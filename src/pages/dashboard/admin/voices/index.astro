@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../../../../layouts/DashboardLayout.astro';
+import VoiceCreator from './_components/VoiceCreator';
+
+// Check if user is admin (server-side check)
+if (!Astro.locals.user?.isAdmin) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<DashboardLayout title="Voice Creator - Maya Research">
+  <VoiceCreator client:load />
+</DashboardLayout>
+
