@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { AuthProvider } from '../components/common/AuthProvider';
+import PageProgress from '../components/common/PageProgress';
 import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
@@ -24,6 +25,9 @@ const { title = 'Maya Research' } = Astro.props;
 		<ViewTransitions />
 	</head>
 	<body>
+		<!-- Loading Progress Bar -->
+		<PageProgress client:only="react" />
+		
 		<AuthProvider client:only="react">
 			<slot />
 		</AuthProvider>
