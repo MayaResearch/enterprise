@@ -13,7 +13,7 @@ function hashApiKey(key: string): string {
 }
 
 // GET - List all API keys for the user
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ locals, url }) => {
   try {
     const user = locals.user;
     if (!user) {
@@ -23,16 +23,25 @@ export const GET: APIRoute = async ({ locals }) => {
       });
     }
 
-    // Try to get from cache first
+    // Check if hard refresh is requested
+    const forceRefresh = url.searchParams.get('refresh') === 'true';
     const cacheKey = cacheKeys.userApiKeys(user.id);
-    const cachedKeys = memoryCache.get<any[]>(cacheKey);
-    
-    if (cachedKeys) {
-      console.log('✅ Cache HIT for user:', user.email);
-      return new Response(JSON.stringify(cachedKeys), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+
+    if (forceRefresh) {
+      // Hard refresh: invalidate cache and force DB query
+      memoryCache.delete(cacheKey);
+      console.log('🔄 Hard refresh requested by user:', user.email);
+    } else {
+      // Try to get from cache first
+      const cachedKeys = memoryCache.get<any[]>(cacheKey);
+      
+      if (cachedKeys) {
+        console.log('✅ Cache HIT for user:', user.email);
+        return new Response(JSON.stringify(cachedKeys), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     console.log('❌ Cache MISS for user:', user.email, '- Fetching from DB');
