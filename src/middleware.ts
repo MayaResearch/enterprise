@@ -11,6 +11,7 @@ export interface AuthUser {
   fullName?: string;
   avatarUrl?: string;
   isAdmin?: boolean;
+  permissionGranted?: boolean;
 }
 
 // Extend Astro's locals type
@@ -65,6 +66,7 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
           fullName: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
           avatarUrl: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
           isAdmin: session.user.user_metadata?.is_admin || false,
+          permissionGranted: session.user.user_metadata?.permission_granted || false,
         };
 
         console.log('✅ Server-side auth: User authenticated', locals.user.email);
@@ -93,6 +95,7 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
             fullName: user.user_metadata?.full_name || user.user_metadata?.name,
             avatarUrl: user.user_metadata?.avatar_url || user.user_metadata?.picture,
             isAdmin: user.user_metadata?.is_admin || false,
+            permissionGranted: user.user_metadata?.permission_granted || false,
           };
           console.log('✅ Server-side auth: User authenticated via Bearer token', locals.user.email);
         } else {

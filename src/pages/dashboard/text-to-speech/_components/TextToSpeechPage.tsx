@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { VoicePicker, type Voice } from '@/components/ui/voice-picker';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/lib/hooks/useAuth';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type CodeTab = 'python' | 'javascript' | 'curl';
 type ContentTab = 'generate' | 'similar';
@@ -124,6 +132,9 @@ const voices: Voice[] = [
 ];
 
 const TextToSpeechPage: React.FC = () => {
+  const { user } = useAuth();
+  const hasPermission = user?.user_metadata?.permission_granted || false;
+  
   const [voiceId, setVoiceId] = useState<string>('Ava');
   const [text, setText] = useState<string>('Welcome back to another episode of our podcast! Today we are diving into an absolutely fascinating topic.');
   const [stream, setStream] = useState<boolean>(false);
@@ -136,11 +147,17 @@ const TextToSpeechPage: React.FC = () => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioMimeType, setAudioMimeType] = useState<string>('audio/mpeg');
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [permissionDeniedOpen, setPermissionDeniedOpen] = useState<boolean>(false);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const [previewPlayingVoiceId, setPreviewPlayingVoiceId] = useState<string | null>(null);
   const previewAudioRef = React.useRef<HTMLAudioElement | null>(null);
 
   const handleGenerate = async (): Promise<void> => {
+    if (!hasPermission) {
+      setPermissionDeniedOpen(true);
+      return;
+    }
+    
     setIsLoading(true);
     setOutput('Generating speech...');
     
@@ -1067,6 +1084,67 @@ const result = await maya.ttsGenerate({
           </div>
         </div>
       </div>
+
+      {/* Permission Denied Dialog */}
+      <Dialog open={permissionDeniedOpen} onOpenChange={setPermissionDeniedOpen}>
+        <DialogContent className="sm:rounded-3xl focus-visible:outline-0 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold leading-6 tracking-tight">
+              Permission Required
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              You don't have permission to access this platform feature.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex gap-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-amber-600 flex-shrink-0 mt-0.5"
+                >
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-amber-900 mb-1">
+                    Access Restricted
+                  </p>
+                  <p className="text-sm text-amber-800">
+                    Please contact the Maya team to request platform access. Once granted, you'll be able to generate speech and use all platform features.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setPermissionDeniedOpen(false)}
+              className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 h-9 px-4 rounded-full inline-flex border border-gray-200 hover:bg-gray-50"
+            >
+              Close
+            </button>
+            <a
+              href="mailto:support@mayaresearch.ai?subject=Platform Access Request"
+              className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 text-white h-9 px-4 rounded-full inline-flex"
+              style={{ backgroundColor: '#262626' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
+            >
+              Contact Maya Team
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

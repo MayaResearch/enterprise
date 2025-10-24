@@ -123,6 +123,31 @@ const Sidebar: React.FC = () => {
     }
   ]
 
+  const adminNavItems: NavItem[] = [
+    {
+      id: 'admin-management',
+      label: 'Admin Management',
+      href: '/dashboard/admin',
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={16}
+          height={16}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-shield-check"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      )
+    }
+  ]
+
   const renderNavItem = (item: NavItem, isLast: boolean = false): React.ReactNode => {
     const isActive = currentPath === item.href
     
@@ -194,6 +219,21 @@ const Sidebar: React.FC = () => {
           {/* Management Navigation Items */}
           {managementNavItems.map((item, index) => 
             renderNavItem(item, index === managementNavItems.length - 1)
+          )}
+
+          {/* Admin Section - Only visible to admins */}
+          {user?.user_metadata?.is_admin && (
+            <>
+              <div className="mb-[22px]"></div>
+              <p className='not-italic mb-1 font-medium text-[rgb(141,156,167)] transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto whitespace-nowrap antialiased text-sm'>
+                Admin
+              </p>
+              
+              {/* Admin Navigation Items */}
+              {adminNavItems.map((item, index) => 
+                renderNavItem(item, index === adminNavItems.length - 1)
+              )}
+            </>
           )}
         </div>
 

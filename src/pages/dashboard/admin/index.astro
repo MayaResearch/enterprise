@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import AdminManagement from './_components/AdminManagement';
+
+// Check if user is admin (server-side check)
+if (!Astro.locals.user?.isAdmin) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<DashboardLayout title="Admin Management - Maya Research">
+  <AdminManagement client:load />
+</DashboardLayout>
+

@@ -3,9 +3,12 @@
 -- Run this entire script in your Supabase SQL Editor
 -- ============================================================================
 
--- Step 1: Add is_admin column to users table
+-- Step 1: Add is_admin and permission_granted columns to users table
 ALTER TABLE public.users 
 ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
+
+ALTER TABLE public.users 
+ADD COLUMN IF NOT EXISTS permission_granted BOOLEAN NOT NULL DEFAULT false;
 
 -- Step 2: Convert user_id from TEXT to UUID in api_keys table
 ALTER TABLE public.api_keys 
@@ -22,6 +25,7 @@ BEGIN
     avatar_url,
     provider,
     is_admin,
+    permission_granted,
     created_at,
     updated_at
   )
@@ -32,6 +36,7 @@ BEGIN
     COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture'),
     NEW.raw_app_meta_data->>'provider',
     COALESCE((NEW.raw_user_meta_data->>'is_admin')::boolean, false),
+    COALESCE((NEW.raw_user_meta_data->>'permission_granted')::boolean, false),
     NOW(),
     NOW()
   )
@@ -41,6 +46,7 @@ BEGIN
     full_name = EXCLUDED.full_name,
     avatar_url = EXCLUDED.avatar_url,
     is_admin = EXCLUDED.is_admin,
+    permission_granted = EXCLUDED.permission_granted,
     updated_at = NOW();
   
   RETURN NEW;

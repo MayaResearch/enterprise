@@ -7,6 +7,7 @@ export const users = pgTable('users', {
   avatarUrl: text('avatar_url'),
   provider: text('provider').notNull().default('google'),
   isAdmin: boolean('is_admin').notNull().default(false),
+  permissionGranted: boolean('permission_granted').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

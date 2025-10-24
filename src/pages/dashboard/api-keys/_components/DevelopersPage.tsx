@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/lib/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,9 @@ interface ToggleConfirmation {
 }
 
 const DevelopersPage: React.FC = () => {
+  const { user } = useAuth();
+  const hasPermission = user?.user_metadata?.permission_granted || false;
+  
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -38,6 +42,7 @@ const DevelopersPage: React.FC = () => {
   const [isToggling, setIsToggling] = useState<boolean>(false);
   const [toggleDialogOpen, setToggleDialogOpen] = useState<boolean>(false);
   const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
+  const [permissionDeniedOpen, setPermissionDeniedOpen] = useState<boolean>(false);
   const [pendingToggle, setPendingToggle] = useState<ToggleConfirmation | null>(null);
   const [newKeyName, setNewKeyName] = useState<string>('');
   const [createdKey, setCreatedKey] = useState<string | null>(null);
@@ -82,6 +87,10 @@ const DevelopersPage: React.FC = () => {
   };
 
   const handleCreateKey = (): void => {
+    if (!hasPermission) {
+      setPermissionDeniedOpen(true);
+      return;
+    }
     setCreateDialogOpen(true);
   };
 
@@ -101,9 +110,9 @@ const DevelopersPage: React.FC = () => {
       if (response.ok) {
         const newKey = await response.json();
         setCreatedKey(newKey.key); // Save the full key to show once
-        setApiKeys(prevKeys => [...prevKeys, newKey]);
-        setCreateDialogOpen(false);
-        setNewKeyName('');
+      setApiKeys(prevKeys => [...prevKeys, newKey]);
+    setCreateDialogOpen(false);
+    setNewKeyName('');
         // Small delay to show transition
         setTimeout(() => {
           setShowKeyDialog(true); // Show the key in a dialog
@@ -142,8 +151,8 @@ const DevelopersPage: React.FC = () => {
       });
 
       if (response.ok) {
-        setApiKeys(prevKeys => 
-          prevKeys.map(key => 
+      setApiKeys(prevKeys => 
+        prevKeys.map(key => 
             key.id === pendingToggle.keyId ? { ...key, isActive: pendingToggle.newState } : key
           )
         );
@@ -181,7 +190,7 @@ const DevelopersPage: React.FC = () => {
 
   // Show loading state
   if (isLoading) {
-    return (
+  return (
       <div className="flex justify-center items-center min-h-screen w-full px-4 py-8">
         <div className="w-full max-w-5xl">
           {/* Header Skeleton */}
@@ -273,16 +282,16 @@ const DevelopersPage: React.FC = () => {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
               width={20}
               height={20}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               className="mr-2"
             >
               <path d="M5 12h14" />
@@ -389,7 +398,7 @@ const DevelopersPage: React.FC = () => {
                     <>
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
+              </svg>
                       Copied!
                     </>
                   ) : (
@@ -409,7 +418,7 @@ const DevelopersPage: React.FC = () => {
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
                 >
                   Done
-                </button>
+            </button>
               </div>
             </DialogContent>
           </Dialog>
@@ -432,33 +441,33 @@ const DevelopersPage: React.FC = () => {
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <a
-              target="_blank"
-              className="chakra-link css-spn4bz"
+          <a
+            target="_blank"
+            className="chakra-link css-spn4bz"
               href="mailto:support@mayaresearch.ai"
-              rel="noopener noreferrer"
-            >
+            rel="noopener noreferrer"
+          >
               <button className="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-10 px-4 rounded-full">
                 Contact us for any issue
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={24}
-                  height={24}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-arrow-up-right w-3.5 h-3.5 text-[inherit] opacity-100 -mr-[2px] ml-[4px]"
-                >
-                  <path d="M7 7h10v10" />
-                  <path d="M7 17 17 7" />
-                </svg>
-              </button>
-            </a>
-          </div>
-        </header>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-arrow-up-right w-3.5 h-3.5 text-[inherit] opacity-100 -mr-[2px] ml-[4px]"
+              >
+                <path d="M7 7h10v10" />
+                <path d="M7 17 17 7" />
+              </svg>
+            </button>
+          </a>
+        </div>
+      </header>
         <main className="flex flex-col">
             <section className="flex flex-wrap xs:flex-nowrap justify-between items-end gap-6">
               <p className="text-sm text-subtle font-medium max-w-[600px]">
@@ -509,32 +518,32 @@ const DevelopersPage: React.FC = () => {
                   )}
                   {isRefreshing ? 'Refreshing...' : 'Hard Refresh'}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleCreateKey}
-                  data-loading="false"
+              <button
+                type="button"
+                onClick={handleCreateKey}
+                data-loading="false"
                   className="relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent text-background shadow-none disabled:bg-gray-400 disabled:text-gray-100 h-10 px-4 rounded-full"
                   style={{ backgroundColor: '#262626' }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={24}
+                  height={24}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-plus w-5 h-5 text-[inherit] opacity-100 -ml-[7px] mr-[6px]"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={24}
-                    height={24}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-plus w-5 h-5 text-[inherit] opacity-100 -ml-[7px] mr-[6px]"
-                  >
-                    <path d="M5 12h14" />
-                    <path d="M12 5v14" />
-                  </svg>
-                  Create Key
-                </button>
+                  <path d="M5 12h14" />
+                  <path d="M12 5v14" />
+                </svg>
+                Create Key
+              </button>
               </div>
             </section>
             <section className="mt-7">
@@ -617,10 +626,10 @@ const DevelopersPage: React.FC = () => {
                 </table>
               </div>
             </section>
-        </main>
+      </main>
 
-        {/* Create API Key Dialog */}
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+      {/* Create API Key Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="sm:rounded-3xl focus-visible:outline-0 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold leading-6 tracking-tight">
@@ -651,13 +660,13 @@ const DevelopersPage: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
-            <button
+            <button 
               onClick={handleCancelCreate}
               className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-9 px-3 rounded-full inline-flex"
             >
               Cancel
             </button>
-            <button
+            <button 
               onClick={handleConfirmCreate}
               disabled={!newKeyName.trim() || isCreating}
               className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent text-background shadow-none disabled:bg-gray-400 disabled:text-gray-100 h-9 px-3 rounded-full inline-flex gap-2"
@@ -701,15 +710,15 @@ const DevelopersPage: React.FC = () => {
               {!pendingToggle?.newState && " It will no longer work until it's enabled again."}
             </DialogDescription>
           </DialogHeader>
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
-          <button
-            onClick={handleCancelToggle}
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5">
+            <button 
+              onClick={handleCancelToggle}
             className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent bg-background border border-gray-alpha-200 hover:bg-gray-alpha-50 active:bg-gray-alpha-100 radix-state-open:bg-gray-alpha-50 hover:border-gray-alpha-300 text-foreground shadow-none active:border-gray-alpha-300 disabled:bg-background disabled:text-gray-300 disabled:border-gray-alpha-200 radix-state-open:border-gray-alpha-300 h-9 px-3 rounded-full inline-flex"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleConfirmToggle}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleConfirmToggle}
             disabled={isToggling}
             className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 focus-ring disabled:pointer-events-auto data-[loading='true']:!text-transparent text-background shadow-none disabled:bg-gray-400 disabled:text-gray-100 h-9 px-3 rounded-full inline-flex gap-2"
             style={{ backgroundColor: isToggling ? undefined : '#262626' }}
@@ -789,6 +798,67 @@ const DevelopersPage: React.FC = () => {
             >
               Done
             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Permission Denied Dialog */}
+      <Dialog open={permissionDeniedOpen} onOpenChange={setPermissionDeniedOpen}>
+        <DialogContent className="sm:rounded-3xl focus-visible:outline-0 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold leading-6 tracking-tight">
+              Permission Required
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              You don't have permission to access this platform feature.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex gap-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-amber-600 flex-shrink-0 mt-0.5"
+                >
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-amber-900 mb-1">
+                    Access Restricted
+                  </p>
+                  <p className="text-sm text-amber-800">
+                    Please contact the Maya team to request platform access. Once granted, you'll be able to create API keys and use all platform features.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setPermissionDeniedOpen(false)}
+              className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 h-9 px-4 rounded-full inline-flex border border-gray-200 hover:bg-gray-50"
+            >
+              Close
+            </button>
+            <a
+              href="mailto:support@mayaresearch.ai?subject=Platform Access Request"
+              className="relative items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-75 text-white h-9 px-4 rounded-full inline-flex"
+              style={{ backgroundColor: '#262626' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
+            >
+              Contact Maya Team
+            </a>
           </div>
         </DialogContent>
       </Dialog>
