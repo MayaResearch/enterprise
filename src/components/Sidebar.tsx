@@ -227,11 +227,10 @@ const Sidebar: React.FC = () => {
             <div className="flex items-center justify-center w-7 h-7 rounded-full text-white text-xs font-medium" style={{ backgroundColor: '#262626' }}>
               {user?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
-            <div className="flex-1 flex flex-col items-start min-w-0">
+            <div className="flex-1 flex items-center min-w-0">
               <span className="text-sm font-medium truncate w-full" style={{ color: '#262626' }}>
                 {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
               </span>
-              <span className="text-xs text-gray-500">Logout</span>
             </div>
             <svg
               xmlns="http://www.w3.org/2000/svg"
