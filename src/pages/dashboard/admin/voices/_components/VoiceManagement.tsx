@@ -1110,79 +1110,55 @@ const result = await maya.createVoice({
 
       {/* Edit Voice Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:rounded-3xl focus-visible:outline-0 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:rounded-3xl focus-visible:outline-0 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold leading-6 tracking-tight">
               Edit Voice
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Update voice name, description (tagline), and image
+              Update voice name, tagline, and avatar image
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Editable Fields */}
-            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-semibold text-gray-900">Editable Fields</h3>
-              
-              <div className="space-y-2">
-                <label htmlFor="editVoiceName" className="text-sm font-medium">Voice Name</label>
-                <input
-                  id="editVoiceName"
-                  type="text"
-                  value={editVoiceName}
-                  onChange={(e) => setEditVoiceName(e.target.value)}
-                  placeholder="e.g., Professional Sarah"
-                  className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-white"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="editVoiceDescription" className="text-sm font-medium">Description (Tagline)</label>
-                <textarea
-                  id="editVoiceDescription"
-                  value={editVoiceDescription}
-                  onChange={(e) => setEditVoiceDescription(e.target.value)}
-                  placeholder="e.g., Warm, friendly voice perfect for customer service"
-                  rows={2}
-                  className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none bg-white"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="editVoiceImage" className="text-sm font-medium">Voice Avatar Image</label>
-                {editImagePreview && (
-                  <div className="mb-2">
-                    <img src={editImagePreview} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-gray-200" />
-                  </div>
-                )}
-                <input
-                  id="editVoiceImage"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleEditImageChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
-                />
-              </div>
+            <div className="space-y-2">
+              <label htmlFor="editVoiceName" className="text-sm font-medium">Voice Name</label>
+              <input
+                id="editVoiceName"
+                type="text"
+                value={editVoiceName}
+                onChange={(e) => setEditVoiceName(e.target.value)}
+                placeholder="e.g., Professional Sarah"
+                className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
             </div>
 
-            {/* Read-only Fields */}
-            <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-              <h3 className="text-sm font-semibold text-amber-900">Generation Parameters (Read-only)</h3>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-amber-900">Voice Description (Used for Generation)</label>
-                <div className="w-full px-3 py-2 border border-amber-200 rounded-md text-sm bg-amber-50/50 text-gray-700">
-                  {editingVoice?.voiceDescription || 'No description'}
-                </div>
-              </div>
+            <div className="space-y-2">
+              <label htmlFor="editVoiceDescription" className="text-sm font-medium">Description (Tagline)</label>
+              <textarea
+                id="editVoiceDescription"
+                value={editVoiceDescription}
+                onChange={(e) => setEditVoiceDescription(e.target.value)}
+                placeholder="e.g., Warm, friendly voice perfect for customer service"
+                rows={2}
+                className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-amber-900">Voice Text (Used for Generation)</label>
-                <div className="w-full px-3 py-2 border border-amber-200 rounded-md text-sm bg-amber-50/50 text-gray-700 max-h-32 overflow-y-auto">
-                  {editingVoice?.voiceText || 'No text'}
+            <div className="space-y-2">
+              <label htmlFor="editVoiceImage" className="text-sm font-medium">Voice Avatar Image</label>
+              {editImagePreview && (
+                <div className="mb-2">
+                  <img src={editImagePreview} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-gray-200" />
                 </div>
-              </div>
+              )}
+              <input
+                id="editVoiceImage"
+                type="file"
+                accept="image/*"
+                onChange={handleEditImageChange}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+              />
             </div>
           </div>
 
