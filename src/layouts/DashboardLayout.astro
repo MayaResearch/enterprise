@@ -11,10 +11,8 @@ const { title = 'Dashboard - Maya Research' } = Astro.props;
 
 <Layout title={title}>
 	<div class="flex h-screen overflow-hidden bg-white">
-		<!-- Desktop Sidebar -->
-		<div class="hidden lg:block">
-			<Sidebar client:load />
-		</div>
+		<!-- Sidebar (Desktop visible, Mobile via Sheet) -->
+		<Sidebar client:load />
 		
 		<!-- Main Content -->
 		<div class="flex flex-1 flex-col overflow-hidden">
@@ -27,6 +25,7 @@ const { title = 'Dashboard - Maya Research' } = Astro.props;
 						type="button"
 						class="inline-flex items-center justify-center p-2 rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
 						aria-expanded="false"
+						onclick="let retries=0;const toggle=()=>{if(window.toggleMobileMenu){window.toggleMobileMenu()}else if(retries++<20){setTimeout(toggle,50)}};toggle()"
 					>
 						<span class="sr-only">Open menu</span>
 						<svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -44,16 +43,4 @@ const { title = 'Dashboard - Maya Research' } = Astro.props;
 	<!-- Mobile Sidebar Sheet (via Sidebar component's internal sheet) -->
 </Layout>
 
-<script>
-	// Mobile menu toggle handled by Sidebar component
-	document.addEventListener('DOMContentLoaded', () => {
-		const menuButton = document.getElementById('mobile-menu-button');
-		if (menuButton) {
-			menuButton.addEventListener('click', () => {
-				// Dispatch custom event that Sidebar component will listen to
-				window.dispatchEvent(new CustomEvent('toggle-mobile-menu'));
-			});
-		}
-	});
-</script>
 

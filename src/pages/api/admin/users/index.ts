@@ -41,7 +41,12 @@ export const GET: APIRoute = async ({ locals, url }) => {
         console.log('✅ Cache HIT for admin users list');
         return new Response(JSON.stringify(cachedUsers), {
           status: 200,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store, no-cache, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
         });
       }
     }
@@ -66,7 +71,12 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     return new Response(JSON.stringify(allUsers), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
     });
   } catch (error) {
     console.error('Error fetching users:', error);

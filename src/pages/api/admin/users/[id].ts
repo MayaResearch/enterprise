@@ -88,26 +88,19 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
     });
     console.log('✅ Updated user data cache for:', updatedUser.email);
     
-    // 2. Update the admin users list cache
+    // 2. Invalidate the admin users list cache (force fresh fetch on next request)
     const allUsersCacheKey = cacheKeys.allUsers();
-    const cachedUsers = memoryCache.get<any[]>(allUsersCacheKey);
-    
-    if (cachedUsers) {
-      const updatedUsers = cachedUsers.map(u => 
-        u.id === id ? { 
-          ...u, 
-          permissionGranted: updatedUser.permissionGranted,
-          isAdmin: updatedUser.isAdmin,
-          updatedAt: updatedUser.createdAt 
-        } : u
-      );
-      memoryCache.set(allUsersCacheKey, updatedUsers);
-      console.log('✅ Updated admin users list cache');
-    }
+    memoryCache.delete(allUsersCacheKey);
+    console.log('✅ Invalidated admin users list cache');
 
     return new Response(JSON.stringify(updatedUser), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
     });
   } catch (error) {
     console.error('Error updating user permission:', error);

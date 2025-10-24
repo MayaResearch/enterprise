@@ -21,16 +21,26 @@ const Sidebar: React.FC = () => {
   const { user, isAdmin } = useAuth()
 
   useEffect(() => {
-    setCurrentPath(window.location.pathname)
+    // Set initial path
+    const pathname = window.location.pathname
+    setCurrentPath(pathname)
     
-    // Listen for mobile menu toggle event
+    // Expose global function to toggle mobile menu
+    const toggleFunction = () => {
+      setMobileMenuOpen((prev: boolean) => !prev)
+    }
+    
+    (window as any).toggleMobileMenu = toggleFunction
+    
+    // Also listen for custom event as fallback
     const handleToggleMenu = () => {
-      setMobileMenuOpen(prev => !prev)
+      setMobileMenuOpen((prev: boolean) => !prev)
     }
     
     window.addEventListener('toggle-mobile-menu', handleToggleMenu)
     
     return () => {
+      delete (window as any).toggleMobileMenu
       window.removeEventListener('toggle-mobile-menu', handleToggleMenu)
     }
   }, [])
@@ -197,6 +207,12 @@ const Sidebar: React.FC = () => {
         key={item.id}
         href={item.href}
         title={item.label}
+        onClick={() => {
+          // Close mobile menu when navigating
+          if (mobileMenuOpen) {
+            setMobileMenuOpen(false)
+          }
+        }}
         className={`
           flex flex-row items-center gap-1.5 h-8 rounded-lg px-2 
           hover:bg-neutral-200/70 dark:hover:bg-neutral-700 
@@ -337,8 +353,8 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <div className="w-54 h-full pb-3 overflow-hidden border-r border-gray-200 px-4" style={{ backgroundColor: '#fdfdfd' }}>
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <div className="hidden lg:block w-54 h-full pb-3 overflow-hidden border-r border-gray-200 px-4" style={{ backgroundColor: '#fdfdfd' }}>
         <div className="flex flex-col h-full">
           <SidebarContent />
         </div>
@@ -346,7 +362,7 @@ const Sidebar: React.FC = () => {
 
       {/* Mobile Sidebar Sheet */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-[280px] p-0">
+        <SheetContent side="left" className="p-0 gap-0" showCloseButton={false}>
           <div className="w-full h-full pb-3 overflow-hidden px-4" style={{ backgroundColor: '#fdfdfd' }}>
             <div className="flex flex-col h-full">
               <SidebarContent />

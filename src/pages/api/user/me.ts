@@ -25,7 +25,12 @@ export const GET: APIRoute = async ({ locals }) => {
       permissionGranted: user.permissionGranted,
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
     });
   } catch (error) {
     console.error('Error fetching user:', error);

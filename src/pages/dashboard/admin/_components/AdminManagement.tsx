@@ -99,12 +99,8 @@ const AdminManagement: React.FC = () => {
       });
 
       if (response.ok) {
-        // Update local state
-        setUsers(prevUsers => 
-          prevUsers.map(user => 
-            user.id === userId ? { ...user, permissionGranted: !currentPermission } : user
-          )
-        );
+        // Fetch fresh data from database to ensure consistency
+        await fetchUsers(true);
       } else {
         alert('Failed to update permission');
       }
@@ -131,12 +127,8 @@ const AdminManagement: React.FC = () => {
       });
 
       if (response.ok) {
-        // Update local state
-        setUsers(prevUsers => 
-          prevUsers.map(user => 
-            user.id === userId ? { ...user, isAdmin: !currentAdmin } : user
-          )
-        );
+        // Fetch fresh data from database to ensure consistency
+        await fetchUsers(true);
       } else {
         alert('Failed to update admin status');
       }
