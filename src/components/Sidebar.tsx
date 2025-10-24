@@ -197,9 +197,8 @@ const Sidebar: React.FC = () => {
           )}
         </div>
 
-        {/* Feedback & User Profile at Bottom */}
-        <div className="mt-auto pt-4 border-t border-gray-200 space-y-1">
-          {/* Feedback Button */}
+        {/* Feedback Button above border */}
+        <div className="mt-auto pt-2">
           <button
             onClick={() => window.open('https://forms.gle/your-feedback-form', '_blank')}
             className="flex flex-row items-center gap-1.5 w-full h-8 rounded-lg px-2 hover:bg-neutral-200/70 dark:hover:bg-neutral-700 text-sm select-none transition-all duration-150 dark:text-white [font-variation-settings:'wght'_370] [font-weight:370]"
@@ -219,8 +218,10 @@ const Sidebar: React.FC = () => {
             </svg>
             <span className="truncate">Give us feedback</span>
           </button>
+        </div>
 
-          {/* Logout Button */}
+        {/* User Profile & Logout Button below border */}
+        <div className="pt-4 border-t border-gray-200">
           <button
             onClick={handleLogout}
             className="flex flex-row items-center gap-2 w-full h-10 rounded-lg px-2 hover:bg-neutral-200/70 dark:hover:bg-neutral-700 text-sm select-none transition-all duration-150 dark:text-white"
