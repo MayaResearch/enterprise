@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { VoicePicker, type Voice } from '@/components/ui/voice-picker';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -12,6 +12,17 @@ import {
 
 type CodeTab = 'python' | 'javascript' | 'curl';
 type ContentTab = 'generate' | 'similar';
+
+interface PublicVoice {
+  id: string;
+  voiceId: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  previewUrl: string | null;
+  isPublic: boolean;
+  createdAt: string | Date;
+}
 
 const voices: Voice[] = [
   {
@@ -152,6 +163,33 @@ const TextToSpeechPage: React.FC = () => {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const [previewPlayingVoiceId, setPreviewPlayingVoiceId] = useState<string | null>(null);
   const previewAudioRef = React.useRef<HTMLAudioElement | null>(null);
+  
+  // Public voices from database
+  const [publicVoices, setPublicVoices] = useState<PublicVoice[]>([]);
+  const [isLoadingVoices, setIsLoadingVoices] = useState<boolean>(false);
+  const previewVoiceAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Fetch public voices when Voice Library tab is opened
+  useEffect(() => {
+    if (contentTab === 'similar' && publicVoices.length === 0) {
+      fetchPublicVoices();
+    }
+  }, [contentTab]);
+
+  const fetchPublicVoices = async (): Promise<void> => {
+    setIsLoadingVoices(true);
+    try {
+      const response = await fetch('/api/voices/public');
+      if (response.ok) {
+        const data = await response.json();
+        setPublicVoices(data);
+      }
+    } catch (error) {
+      console.error('Error fetching public voices:', error);
+    } finally {
+      setIsLoadingVoices(false);
+    }
+  };
 
   const handleGenerate = async (): Promise<void> => {
     if (!hasPermission) {
@@ -341,6 +379,56 @@ const TextToSpeechPage: React.FC = () => {
     // Create and play new audio
     const audio = new Audio(voice.previewUrl);
     previewAudioRef.current = audio;
+
+    audio.onended = () => {
+      setPreviewPlayingVoiceId(null);
+    };
+
+    audio.onerror = () => {
+      console.error('Error playing preview audio');
+      setPreviewPlayingVoiceId(null);
+    };
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setPreviewPlayingVoiceId(voice.voiceId);
+        })
+        .catch((error) => {
+          console.error('Error playing preview:', error);
+          setPreviewPlayingVoiceId(null);
+        });
+    }
+  };
+
+  // Handle preview audio playback for PublicVoice
+  const handlePublicVoicePreviewPlay = (voice: PublicVoice): void => {
+    if (!voice.previewUrl) return;
+
+    if (previewPlayingVoiceId === voice.voiceId) {
+      if (previewVoiceAudioRef.current) {
+        try {
+          previewVoiceAudioRef.current.pause();
+          setPreviewPlayingVoiceId(null);
+        } catch (error) {
+          console.error('Error pausing preview:', error);
+        }
+      }
+      return;
+    }
+
+    if (previewVoiceAudioRef.current) {
+      try {
+        previewVoiceAudioRef.current.pause();
+        previewVoiceAudioRef.current.src = '';
+      } catch (error) {
+        console.error('Error stopping previous preview:', error);
+      }
+    }
+
+    const audio = new Audio(voice.previewUrl);
+    previewVoiceAudioRef.current = audio;
 
     audio.onended = () => {
       setPreviewPlayingVoiceId(null);
@@ -771,93 +859,119 @@ const result = await maya.ttsGenerate({
             {/* Voice Library Tab Content */}
             {contentTab === 'similar' && (
               <div className="grid grid-cols-1 gap-3 pt-4">
-                {voices.map((voice, index) => (
-                  <div key={voice.voiceId} className="group/octave-voice-card flex min-h-24 flex-row gap-0 rounded-lg border border-gray-200 bg-white hover:shadow-sm transition-shadow">
-                    {/* Avatar Section */}
-                    <div className="flex h-full shrink-0 items-center py-2.5 pl-2 pr-4">
-                      <div
-                        className="group/voice-card relative aspect-square shrink-0 rounded size-20 grid place-content-center overflow-hidden bg-gradient-to-b from-blue-300 to-blue-300"
-                        data-index={index % 6}
-                      >
-                        {voice.previewUrl && (
-                          <div className="absolute inset-0 bg-gray-200"></div>
-                        )}
-                        <div className="absolute inset-0 grid place-content-center">
-                          <button 
-                            className="relative grid size-8 place-content-center rounded-full bg-white/80 text-gray-800 outline-none hover:bg-white/100"
-                            onClick={() => handlePreviewPlay(voice)}
-                          >
-                            {previewPlayingVoiceId === voice.voiceId ? (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width={24}
-                                height={24}
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="size-4"
+                {isLoadingVoices ? (
+                  // Loading skeletons
+                  [1, 2, 3].map((i) => (
+                    <div key={i} className="flex min-h-24 flex-row gap-0 rounded-lg border border-gray-200 bg-white p-2">
+                      <Skeleton className="size-20 rounded shrink-0 mr-4" />
+                      <div className="flex-1 flex flex-col justify-center gap-2">
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-4 w-48" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-9 w-16 rounded-full" />
+                        <Skeleton className="h-9 w-24 rounded-full" />
+                      </div>
+                    </div>
+                  ))
+                ) : publicVoices.length === 0 ? (
+                  // Empty state
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <p className="text-sm text-muted-foreground">No public voices available yet</p>
+                  </div>
+                ) : (
+                  // Voice cards
+                  publicVoices.map((voice) => (
+                    <div key={voice.id} className="group/octave-voice-card flex min-h-24 flex-row gap-0 rounded-lg border border-gray-200 bg-white hover:shadow-sm transition-shadow">
+                      {/* Avatar Section */}
+                      <div className="flex h-full shrink-0 items-center py-2.5 pl-2 pr-4">
+                        <div className="group/voice-card relative aspect-square shrink-0 rounded size-20 grid place-content-center overflow-hidden bg-gradient-to-b from-blue-300 to-blue-300">
+                          {voice.imageUrl && (
+                            <img 
+                              src={voice.imageUrl} 
+                              alt={voice.name} 
+                              className="absolute inset-0 w-full h-full object-cover"
+                            />
+                          )}
+                          {voice.previewUrl && (
+                            <div className="absolute inset-0 grid place-content-center">
+                              <button 
+                                className="relative grid size-8 place-content-center rounded-full bg-white/80 text-gray-800 outline-none hover:bg-white/100"
+                                onClick={() => handlePublicVoicePreviewPlay(voice)}
                               >
-                                <rect x="6" y="4" width="4" height="16" fill="currentColor" />
-                                <rect x="14" y="4" width="4" height="16" fill="currentColor" />
-                              </svg>
-                            ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width={24}
-                                height={24}
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="size-4 [&_path]:fill-current"
-                              >
-                                <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
-                              </svg>
-                            )}
-                          </button>
+                                {previewPlayingVoiceId === voice.voiceId ? (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width={24}
+                                    height={24}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="size-4"
+                                  >
+                                    <rect x="6" y="4" width="4" height="16" fill="currentColor" />
+                                    <rect x="14" y="4" width="4" height="16" fill="currentColor" />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width={24}
+                                    height={24}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="size-4 [&_path]:fill-current"
+                                  >
+                                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+                                  </svg>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Voice Info */}
-                    <div className="flex min-w-0 shrink grow flex-col items-start justify-center gap-1 py-4 pl-0">
-                      <div className="flex w-full items-center gap-0">
-                        <span className="min-w-0 flex-1 truncate text-base/5 font-medium">
-                          {voice.name}
-                        </span>
+                      {/* Voice Info */}
+                      <div className="flex min-w-0 shrink grow flex-col items-start justify-center gap-1 py-4 pl-0">
+                        <div className="flex w-full items-center gap-0">
+                          <span className="min-w-0 flex-1 truncate text-base/5 font-medium">
+                            {voice.name}
+                          </span>
+                        </div>
+                        <div className="flex w-full items-center gap-0">
+                          <span className="min-w-0 flex-1 truncate text-sm/4 font-normal text-gray-600">
+                            {voice.description || 'No description'}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex w-full items-center gap-0">
-                        <span className="min-w-0 flex-1 truncate text-sm/4 font-normal text-gray-600">
-                          {voice.description}
-                        </span>
-                      </div>
-                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex shrink-0 flex-row items-center justify-end gap-1 px-4 py-2">
-                      <button
-                        className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100"
-                        type="button"
-                      >
-                        Info
-                      </button>
-                      <button
-                        onClick={() => {
-                          setVoiceId(voice.voiceId);
-                          setContentTab('generate');
-                        }}
-                        className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100 shrink-0"
-                      >
-                        Use Voice
-                      </button>
+                      {/* Action Buttons */}
+                      <div className="flex shrink-0 flex-row items-center justify-end gap-1 px-4 py-2">
+                        <button
+                          className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100"
+                          type="button"
+                        >
+                          Info
+                        </button>
+                        <button
+                          onClick={() => {
+                            setVoiceId(voice.voiceId);
+                            setContentTab('generate');
+                          }}
+                          className="box-border inline-flex items-center justify-center gap-1.5 border font-medium cursor-pointer focus:outline-none focus-visible:ring rounded-full grow-0 no-underline h-9 px-4 text-sm leading-4 border-gray-200 bg-transparent hover:bg-gray-100 shrink-0"
+                        >
+                          Use Voice
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             )}
           </div>
