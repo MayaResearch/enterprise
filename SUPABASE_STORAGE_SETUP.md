@@ -14,28 +14,57 @@
 
 6. Click **"Create bucket"**
 
-## Configure Storage Policies (Optional - for additional security)
+## Fix RLS Policy Error (REQUIRED)
 
-If you want more granular control, you can add these policies in the **Storage Policies** section:
+If you see "new row violates row-level security policy", you need to add storage policies.
 
-### Policy 1: Admins can upload files
+### Option 1: Quick Fix - Disable RLS (Easy, for testing)
+
+1. Go to **Storage** → **voice-assets**
+2. Click **"Policies"** tab
+3. Click **"New Policy"**
+4. Select **"For full customization"**
+5. Paste this policy:
+
+```sql
+CREATE POLICY "Allow authenticated uploads"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'voice-assets');
+
+CREATE POLICY "Allow authenticated updates"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (bucket_id = 'voice-assets');
+
+CREATE POLICY "Allow authenticated deletes"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (bucket_id = 'voice-assets');
+
+CREATE POLICY "Allow public reads"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'voice-assets');
+```
+
+### Option 2: Admin-Only Policies (Recommended for production)
+
+For better security, restrict uploads to admins only:
+
 ```sql
 CREATE POLICY "Admins can upload voice assets"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
   bucket_id = 'voice-assets' 
-  AND (storage.foldername(name))[1] = 'voices'
   AND EXISTS (
     SELECT 1 FROM public.users
     WHERE users.id = auth.uid()
     AND users.is_admin = true
   )
 );
-```
 
-### Policy 2: Admins can update files
-```sql
 CREATE POLICY "Admins can update voice assets"
 ON storage.objects FOR UPDATE
 TO authenticated
@@ -47,10 +76,7 @@ USING (
     AND users.is_admin = true
   )
 );
-```
 
-### Policy 3: Admins can delete files
-```sql
 CREATE POLICY "Admins can delete voice assets"
 ON storage.objects FOR DELETE
 TO authenticated
@@ -62,10 +88,7 @@ USING (
     AND users.is_admin = true
   )
 );
-```
 
-### Policy 4: Everyone can view public files
-```sql
 CREATE POLICY "Anyone can view voice assets"
 ON storage.objects FOR SELECT
 TO public
