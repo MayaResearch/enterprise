@@ -49,6 +49,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
+    const voiceDescription = formData.get('voiceDescription') as string;
+    const voiceText = formData.get('voiceText') as string;
     const imageFile = formData.get('image') as File;
     const audioFile = formData.get('audio') as File;
 
@@ -134,6 +136,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
         voiceId,
         name,
         description: description || null,
+        voiceDescription: voiceDescription || null,
+        voiceText: voiceText || null,
         imageUrl,
         previewUrl: audioUrl,
         isPublic: false,

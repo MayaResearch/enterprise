@@ -182,6 +182,9 @@ const VoiceManagement: React.FC = () => {
       if (voiceDescription) {
         formData.append('description', voiceDescription);
       }
+      // Save the voice generation parameters
+      formData.append('voiceDescription', description);
+      formData.append('voiceText', testText);
       formData.append('image', imageFile);
       if (audioBlob) {
         const extension = audioMimeType.includes('mp3') ? 'mp3' : 
@@ -694,13 +697,6 @@ const result = await maya.createVoice({
                                 onCheckedChange={() => handleTogglePublic(voice.id, voice.isPublic)}
                               />
                             </div>
-                            <span className={`text-xs px-3 py-2 rounded-full border ${
-                              voice.isPublic 
-                                ? 'bg-green-50 text-green-700 border-green-200' 
-                                : 'bg-gray-50 text-gray-600 border-gray-200'
-                            }`}>
-                              {voice.isPublic ? 'Visible' : 'Hidden'}
-                            </span>
                           </div>
                         </div>
                       ))}

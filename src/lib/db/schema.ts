@@ -30,6 +30,8 @@ export const voices = pgTable('voices', {
   voiceId: text('voice_id').notNull().unique(), // e.g., "custom_voice_001"
   name: text('name').notNull(), // Display name (tag name)
   description: text('description'), // Subtitle/tag description
+  voiceDescription: text('voice_description'), // Voice characteristics used for generation
+  voiceText: text('voice_text'), // Test text used for generation
   imageUrl: text('image_url'), // Avatar stored in Supabase Storage
   previewUrl: text('preview_url'), // Audio preview stored in Supabase Storage
   isPublic: boolean('is_public').default(false), // Show in playground

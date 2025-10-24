@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS public.voices (
   voice_id TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   description TEXT,
+  voice_description TEXT,
+  voice_text TEXT,
   image_url TEXT,
   preview_url TEXT,
   is_public BOOLEAN DEFAULT false,
