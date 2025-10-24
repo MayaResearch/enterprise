@@ -1,5 +1,15 @@
 ---
-import { HomeRedirect } from '../components/home/HomeRedirect';
+// Server-side redirect is handled by middleware
+// This page should never be reached
 ---
 
-<HomeRedirect client:only="react" />
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>

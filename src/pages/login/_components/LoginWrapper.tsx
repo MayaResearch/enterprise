@@ -1,5 +1,5 @@
 import React, { useEffect, type JSX, type ReactNode } from 'react';
-import { useAuth } from '../../../lib/hooks/useAuth';
+import { supabase } from '../../../lib/config/supabase';
 
 interface LoginWrapperProps {
   children: ReactNode;
@@ -8,36 +8,41 @@ interface LoginWrapperProps {
 }
 
 export function LoginWrapper({ children, errorParam, errorMessages }: LoginWrapperProps): JSX.Element {
-  const { loading, isAuthenticated } = useAuth();
-
   useEffect(() => {
-    // Redirect to dashboard if already authenticated
-    if (!loading && isAuthenticated) {
-      window.location.href = '/dashboard';
-    }
-  }, [loading, isAuthenticated]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
-          <p className="mt-4 text-sm text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    // Will redirect via useEffect
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-sm text-gray-600">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+    // Handle OAuth callback after redirect from Google
+    const handleAuthCallback = async () => {
+      // Check if we have OAuth params in URL
+      const params = new URLSearchParams(window.location.search);
+      const hasOAuthParams = params.has('code') || params.has('access_token');
+      
+      if (hasOAuthParams) {
+        console.log('🔄 OAuth callback detected, processing...');
+        
+        // Wait a bit for Supabase to process the callback automatically
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check if session is now established
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          console.log('✅ Session established, redirecting to dashboard');
+          
+          // Save tokens to cookies
+          document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=604800; SameSite=Lax`;
+          document.cookie = `sb-refresh-token=${session.refresh_token}; path=/; max-age=604800; SameSite=Lax`;
+          
+          // Redirect to dashboard
+          window.location.href = '/dashboard';
+        } else {
+          console.log('⚠️ No session after OAuth callback');
+          // Clean up URL params
+          window.history.replaceState({}, document.title, '/login');
+        }
+      }
+    };
+    
+    handleAuthCallback();
+  }, []);
 
   return <>{children}</>;
 }

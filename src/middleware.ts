@@ -110,10 +110,15 @@ export const onRequest = defineMiddleware(async ({ request, locals, cookies, red
 
   // Don't redirect on API routes or auth callback routes
   const isApiRoute = pathname.startsWith('/api/');
-  const isAuthCallback = pathname.includes('/auth/callback') || url.searchParams.has('code');
+  const isAuthCallback = pathname.includes('/auth/callback') || url.searchParams.has('code') || url.searchParams.has('access_token');
   
   // Skip redirects for API and auth callback routes
   if (isApiRoute || isAuthCallback) {
+    return next();
+  }
+
+  // Also allow login page to process OAuth callback
+  if (pathname === '/login' && url.searchParams.size > 0) {
     return next();
   }
 
