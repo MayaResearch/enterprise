@@ -47,26 +47,37 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
--- GRANT PERMISSION TO AN EXISTING USER (EXAMPLE)
+-- FIRST TIME SETUP: MAKE YOURSELF AN ADMIN
 -- ============================================================================
--- Replace 'user@example.com' with the actual user's email
+-- Step 1: Update the database (replace with your email)
+UPDATE public.users 
+SET is_admin = true, permission_granted = true 
+WHERE email = 'your-email@example.com';
+
+-- Step 2: MANUALLY update Supabase Auth metadata (REQUIRED for first admin):
+--   Go to: Supabase Dashboard → Authentication → Users
+--   Find your user → Click to expand → Edit User Metadata
+--   Add this JSON to user_metadata:
+--   {
+--     "is_admin": true,
+--     "permission_granted": true
+--   }
+--   Save and log out/log in again
+
+-- Step 3: After logging back in, you can access /dashboard/admin
+
+-- ============================================================================
+-- GRANT PERMISSION TO OTHER USERS (via Admin Panel)
+-- ============================================================================
+-- After you're an admin, use the Admin Management page at /dashboard/admin
+-- to grant permissions to other users. This will:
+-- 1. Update public.users table
+-- 2. Update in-memory cache for fast access
+-- 3. User needs to log out/log in to see changes (trigger syncs metadata)
+
+-- OR manually via SQL:
 -- UPDATE public.users 
 -- SET permission_granted = true 
--- WHERE email = 'user@example.com';
-
--- ============================================================================
--- MAKE A USER AN ADMIN (EXAMPLE)
--- ============================================================================
--- Replace 'admin@example.com' with the actual admin's email
--- UPDATE public.users 
--- SET is_admin = true, permission_granted = true 
--- WHERE email = 'admin@example.com';
-
--- Also update in Supabase Auth (required for metadata sync):
--- Go to Authentication > Users in Supabase Dashboard
--- Select the user and add to user_metadata:
--- {
---   "is_admin": true,
---   "permission_granted": true
--- }
+-- WHERE email = 'another-user@example.com';
+-- (User needs to log out/log in for the trigger to sync metadata)
 

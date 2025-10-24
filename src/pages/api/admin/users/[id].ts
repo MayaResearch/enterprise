@@ -2,26 +2,11 @@ import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { createClient } from '@supabase/supabase-js';
+import { memoryCache } from '@/lib/cache/memoryCache';
 
 export const prerender = false;
 
-// Create admin client with service role key
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-const supabaseServiceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseServiceRoleKey) {
-  console.error('Missing Supabase admin credentials');
-}
-
-const supabaseAdmin = supabaseUrl && supabaseServiceRoleKey 
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    })
-  : null;
+const ADMIN_USERS_CACHE_KEY = 'admin:all-users';
 
 // PATCH - Update user permissions (admin only)
 export const PATCH: APIRoute = async ({ locals, request, params }) => {
@@ -60,7 +45,7 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
       });
     }
 
-    // Update in local database
+    // Update in public.users database
     const [updatedUser] = await db
       .update(users)
       .set({ 
@@ -74,6 +59,7 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
         fullName: users.fullName,
         isAdmin: users.isAdmin,
         permissionGranted: users.permissionGranted,
+        createdAt: users.createdAt,
       });
 
     if (!updatedUser) {
@@ -83,40 +69,17 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
       });
     }
 
-    // Also update in Supabase auth user metadata
-    if (supabaseAdmin) {
-      try {
-        // First, get the current user to preserve existing metadata
-        const { data: authUser, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(id);
-        
-        if (getUserError) {
-          console.error('Error fetching user from Supabase:', getUserError);
-        } else {
-          // Merge with existing metadata to preserve other fields
-          const currentMetadata = authUser.user.user_metadata || {};
-          
-          const { error: supabaseError } = await supabaseAdmin.auth.admin.updateUserById(
-            id,
-            {
-              user_metadata: {
-                ...currentMetadata,
-                permission_granted: permissionGranted,
-                is_admin: updatedUser.isAdmin, // Also sync is_admin
-              },
-            }
-          );
-
-          if (supabaseError) {
-            console.error('Error updating Supabase user metadata:', supabaseError);
-          } else {
-            console.log('✅ Successfully updated Supabase user metadata for:', updatedUser.email);
-          }
-        }
-      } catch (error) {
-        console.error('Error updating Supabase:', error);
-      }
+    // Update cache directly by modifying the specific user
+    const cachedUsers = memoryCache.get<any[]>(ADMIN_USERS_CACHE_KEY);
+    
+    if (cachedUsers) {
+      const updatedUsers = cachedUsers.map(u => 
+        u.id === id ? { ...u, permissionGranted, updatedAt: updatedUser.createdAt } : u
+      );
+      memoryCache.set(ADMIN_USERS_CACHE_KEY, updatedUsers);
+      console.log('✅ Updated cache for user:', id, updatedUser.email);
     } else {
-      console.warn('⚠️ Supabase admin client not available - metadata not synced');
+      console.log('ℹ️ No cache to update for admin users');
     }
 
     return new Response(JSON.stringify(updatedUser), {
