@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { apiKeys } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import crypto from 'crypto';
+import { memoryCache, cacheKeys } from '@/lib/cache/memoryCache';
 
 export const prerender = false;
 
@@ -22,6 +23,21 @@ export const GET: APIRoute = async ({ locals }) => {
       });
     }
 
+    // Try to get from cache first
+    const cacheKey = cacheKeys.userApiKeys(user.id);
+    const cachedKeys = memoryCache.get<any[]>(cacheKey);
+    
+    if (cachedKeys) {
+      console.log('✅ Cache HIT for user:', user.email);
+      return new Response(JSON.stringify(cachedKeys), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('❌ Cache MISS for user:', user.email, '- Fetching from DB');
+
+    // Cache miss - fetch from database
     const keys = await db
       .select({
         id: apiKeys.id,
@@ -43,6 +59,9 @@ export const GET: APIRoute = async ({ locals }) => {
       ...key,
       keyPreview: key.keyHash.slice(-4),
     }));
+
+    // Store in cache for 5 minutes
+    memoryCache.set(cacheKey, keysWithPreview, 5 * 60 * 1000);
 
     return new Response(JSON.stringify(keysWithPreview), {
       status: 200,
@@ -102,6 +121,11 @@ export const POST: APIRoute = async ({ locals, request }) => {
         credits: apiKeys.credits,
         createdAt: apiKeys.createdAt,
       });
+
+    // Invalidate cache for this user since we added a new key
+    const cacheKey = cacheKeys.userApiKeys(user.id);
+    memoryCache.delete(cacheKey);
+    console.log('🗑️  Invalidated cache for user:', user.email);
 
     // Return the full key only once during creation, along with preview
     return new Response(JSON.stringify({

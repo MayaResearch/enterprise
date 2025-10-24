@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { apiKeys } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { memoryCache, cacheKeys } from '@/lib/cache/memoryCache';
 
 export const prerender = false;
 
@@ -68,6 +69,11 @@ export const PATCH: APIRoute = async ({ locals, request, params }) => {
       });
     }
 
+    // Invalidate cache for this user since we updated a key
+    const cacheKey = cacheKeys.userApiKeys(user.id);
+    memoryCache.delete(cacheKey);
+    console.log('🗑️  Invalidated cache for user:', user.email);
+
     // Add keyPreview for display
     const response = {
       ...updatedKey,
@@ -117,6 +123,11 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    // Invalidate cache for this user since we deleted a key
+    const cacheKey = cacheKeys.userApiKeys(user.id);
+    memoryCache.delete(cacheKey);
+    console.log('🗑️  Invalidated cache for user:', user.email);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
