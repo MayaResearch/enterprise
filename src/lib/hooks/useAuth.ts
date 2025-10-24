@@ -19,20 +19,6 @@ interface UseAuthReturn {
   permissionGranted: boolean;
 }
 
-// Extend window to include user data
-declare global {
-  interface Window {
-    __USER_DATA__?: {
-      id: string;
-      email: string;
-      fullName?: string;
-      avatarUrl?: string;
-      isAdmin?: boolean;
-      permissionGranted?: boolean;
-    } | null;
-  }
-}
-
 export function useAuth(): UseAuthReturn {
   const { user, session, loading } = useStore(authStore);
   const [dbUserData, setDbUserData] = useState<DbUserData>({
@@ -40,13 +26,22 @@ export function useAuth(): UseAuthReturn {
     permissionGranted: false,
   });
 
-  // Get user permissions from global data (set by server)
+  // Fetch user permissions from database
   useEffect(() => {
-    if (user && typeof window !== 'undefined' && window.__USER_DATA__) {
-      setDbUserData({
-        isAdmin: window.__USER_DATA__.isAdmin || false,
-        permissionGranted: window.__USER_DATA__.permissionGranted || false,
-      });
+    if (user) {
+      fetch('/api/user/me')
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            setDbUserData({
+              isAdmin: data.isAdmin || false,
+              permissionGranted: data.permissionGranted || false,
+            });
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching user permissions:', err);
+        });
     } else {
       // Reset when logged out
       setDbUserData({
