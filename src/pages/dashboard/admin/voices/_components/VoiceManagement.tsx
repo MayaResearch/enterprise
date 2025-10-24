@@ -305,26 +305,26 @@ const result = await maya.createVoice({
   return (
     <div className="flex h-full w-full overflow-hidden">
       {/* Left Side - Voice Generation & Management */}
-      <div className="flex-1 flex flex-col overflow-hidden border-r">
-        <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-3xl mx-auto space-y-6">
+      <div className="flex-1 flex flex-col overflow-hidden lg:border-r">
+        <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
+          <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
             {/* Header */}
             <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-2">
+              <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
                 Voice Management
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Create and manage custom voices for your platform
               </p>
             </div>
 
             {/* Tabs */}
-            <div className="flex shrink-0 flex-row items-center justify-between mb-6">
-              <div className="flex w-full justify-start gap-3 overflow-x-auto scrollbar-none md:scrollbar-thin">
+            <div className="flex shrink-0 flex-row items-center justify-between mb-4 sm:mb-6">
+              <div className="flex w-full justify-start gap-2 sm:gap-3 overflow-x-auto scrollbar-none md:scrollbar-thin">
                 <button
                   type="button"
                   onClick={() => setContentTab('generate')}
-                  className={`relative isolate flex items-center gap-1 text-base font-medium pb-2 border-b-2 shrink-0 ${
+                  className={`relative isolate flex items-center gap-1 text-sm sm:text-base font-medium pb-2 border-b-2 shrink-0 ${
                     contentTab === 'generate' 
                       ? 'border-current opacity-100' 
                       : 'border-transparent opacity-50 hover:opacity-100'
@@ -335,7 +335,7 @@ const result = await maya.createVoice({
                 <button
                   type="button"
                   onClick={() => setContentTab('manage')}
-                  className={`relative isolate flex items-center gap-1 text-base font-medium pb-2 border-b-2 shrink-0 ${
+                  className={`relative isolate flex items-center gap-1 text-sm sm:text-base font-medium pb-2 border-b-2 shrink-0 whitespace-nowrap ${
                     contentTab === 'manage' 
                       ? 'border-current opacity-100' 
                       : 'border-transparent opacity-50 hover:opacity-100'
@@ -493,12 +493,12 @@ const result = await maya.createVoice({
                 </div>
 
                 {/* API Key Input - Side by Side */}
-                <div className="flex gap-8 items-center">
-                  <div className="flex-shrink-0" style={{ width: '280px' }}>
-                    <label htmlFor="api-key" className="text-base font-semibold block">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-8 sm:items-center">
+                  <div className="flex-shrink-0 sm:w-[280px]">
+                    <label htmlFor="api-key" className="text-sm sm:text-base font-semibold block">
                       API Key
                     </label>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       Your Maya API key
                     </p>
                   </div>
@@ -517,12 +517,12 @@ const result = await maya.createVoice({
                 </div>
 
                 {/* Seed Input - Side by Side */}
-                <div className="flex gap-8 items-center">
-                  <div className="flex-shrink-0" style={{ width: '280px' }}>
-                    <label htmlFor="seed" className="text-base font-semibold block">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-8 sm:items-center">
+                  <div className="flex-shrink-0 sm:w-[280px]">
+                    <label htmlFor="seed" className="text-sm sm:text-base font-semibold block">
                       Seed
                     </label>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       For reproducible results
                     </p>
                   </div>
@@ -546,8 +546,8 @@ const result = await maya.createVoice({
                     {isGenerating && !generatedAudioUrl ? (
                       <Skeleton className="h-24 rounded-lg" />
                     ) : (
-                      <div className="border border-gray-200 rounded-lg p-6 space-y-4">
-                        <h3 className="text-lg font-semibold">Generated Voice Preview</h3>
+                      <div className="border border-gray-200 rounded-lg p-4 sm:p-6 space-y-4">
+                        <h3 className="text-base sm:text-lg font-semibold">Generated Voice Preview</h3>
                         
                         <audio
                           ref={audioRef}
@@ -557,18 +557,18 @@ const result = await maya.createVoice({
                           onPause={() => setIsPlaying(false)}
                         />
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                           <button
                             onClick={handlePlayPause}
-                            className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors"
+                            className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors"
                           >
                             {isPlaying ? (
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="sm:w-5 sm:h-5">
                                 <rect x="6" y="4" width="4" height="16" />
                                 <rect x="14" y="4" width="4" height="16" />
                               </svg>
                             ) : (
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="sm:w-5 sm:h-5">
                                 <path d="M8 5v14l11-7z" />
                               </svg>
                             )}
@@ -576,7 +576,7 @@ const result = await maya.createVoice({
 
                           <button
                             onClick={() => setShowSaveDialog(true)}
-                            className="px-6 py-2 rounded-full text-white font-medium transition-colors"
+                            className="px-4 py-2 sm:px-6 sm:py-2 rounded-full text-white text-sm sm:text-base font-medium transition-colors"
                             style={{ backgroundColor: '#262626' }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#262626')}
@@ -592,16 +592,16 @@ const result = await maya.createVoice({
             ) : (
               <>
                 {/* Manage Voices Content */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {isLoadingVoices ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       {[1, 2, 3, 4].map(i => (
                         <Skeleton key={i} className="h-48 rounded-lg" />
                       ))}
                     </div>
                   ) : voices.length === 0 ? (
-                    <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
-                      <p className="text-gray-500 mb-2">No voices created yet</p>
+                    <div className="text-center py-8 sm:py-12 border-2 border-dashed border-gray-200 rounded-lg">
+                      <p className="text-sm sm:text-base text-gray-500 mb-2">No voices created yet</p>
                       <button
                         onClick={() => setContentTab('generate')}
                         className="text-sm text-blue-600 hover:text-blue-700"
@@ -610,15 +610,15 @@ const result = await maya.createVoice({
                       </button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       {voices.map(voice => (
-                        <div key={voice.id} className="border border-gray-200 rounded-lg p-4 space-y-3 hover:border-gray-300 transition-colors">
-                          <div className="flex items-start gap-3">
+                        <div key={voice.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 space-y-3 hover:border-gray-300 transition-colors">
+                          <div className="flex items-start gap-2 sm:gap-3">
                             {voice.imageUrl ? (
-                              <img src={voice.imageUrl} alt={voice.name} className="w-16 h-16 rounded-full object-cover flex-shrink-0" />
+                              <img src={voice.imageUrl} alt={voice.name} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover flex-shrink-0" />
                             ) : (
-                              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
                                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                                   <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                                   <line x1="12" y1="19" x2="12" y2="22" />
@@ -626,9 +626,9 @@ const result = await maya.createVoice({
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-base truncate">{voice.name}</h3>
+                              <h3 className="font-semibold text-sm sm:text-base truncate">{voice.name}</h3>
                               {voice.description && (
-                                <p className="text-sm text-gray-600 line-clamp-2 mt-1">{voice.description}</p>
+                                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1">{voice.description}</p>
                               )}
                             </div>
                           </div>
@@ -636,36 +636,38 @@ const result = await maya.createVoice({
                           {voice.previewUrl && (
                             <button
                               onClick={() => handlePreviewPlay(voice.id, voice.previewUrl!)}
-                              className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                              className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 hover:text-gray-900 transition-colors"
                             >
                               {previewPlayingVoiceId === voice.id ? (
                                 <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="sm:w-4 sm:h-4">
                                     <rect x="6" y="4" width="4" height="16" />
                                     <rect x="14" y="4" width="4" height="16" />
                                   </svg>
-                                  Pause Preview
+                                  <span className="hidden xs:inline">Pause Preview</span>
+                                  <span className="xs:hidden">Pause</span>
                                 </>
                               ) : (
                                 <>
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="sm:w-4 sm:h-4">
                                     <path d="M8 5v14l11-7z" />
                                   </svg>
-                                  Play Preview
+                                  <span className="hidden xs:inline">Play Preview</span>
+                                  <span className="xs:hidden">Play</span>
                                 </>
                               )}
                             </button>
                           )}
 
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                          <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-0 pt-2 border-t border-gray-200">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-600">Show to Public</span>
+                              <span className="text-xs sm:text-sm text-gray-600">Show to Public</span>
                               <Switch
                                 checked={voice.isPublic}
                                 onCheckedChange={() => handleTogglePublic(voice.id, voice.isPublic)}
                               />
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
+                            <span className={`text-xs px-2 py-1 rounded-full self-start xs:self-auto ${
                               voice.isPublic 
                                 ? 'bg-green-100 text-green-700' 
                                 : 'bg-gray-100 text-gray-600'
@@ -685,7 +687,7 @@ const result = await maya.createVoice({
       </div>
 
       {/* Right Side - Code Examples */}
-      <div className="w-[32rem] flex flex-col overflow-hidden bg-[#1e1e1e]">
+      <div className="hidden lg:flex w-[32rem] flex-col overflow-hidden bg-[#1e1e1e]">
         <div className="flex-1 overflow-auto">
           {/* Tabs */}
           <div className="flex items-center border-b border-gray-800 bg-[#1e1e1e]">
