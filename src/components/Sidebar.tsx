@@ -198,7 +198,7 @@ const Sidebar: React.FC = () => {
         </div>
 
         {/* Feedback Button above border */}
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-2 pb-4">
           <button
             onClick={() => window.open('https://forms.gle/your-feedback-form', '_blank')}
             className="flex flex-row items-center gap-1.5 w-full h-8 rounded-lg px-2 hover:bg-neutral-200/70 dark:hover:bg-neutral-700 text-sm select-none transition-all duration-150 dark:text-white [font-variation-settings:'wght'_370] [font-weight:370]"
