@@ -7,7 +7,11 @@ import vercel from "@astrojs/vercel";
 // https://astro.build/config
 export default defineConfig({
   output: 'server', // Enable server-side rendering for API routes
-  adapter: vercel(), // Vercel adapter for deployment
+  adapter: vercel({
+    webAnalytics: {
+      enabled: false,
+    },
+  }),
   
   vite: {
     plugins: [tailwindcss()],
